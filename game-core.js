@@ -49,6 +49,8 @@
   function themeForLevel(level) { return THEMES[(level - 1) % THEMES.length]; }
 
   function menuForLevel(level) {
+    const l = RAW[level - 1];
+    if (l && l.menu) return l.menu; // 8 dishes drawn from the theme's 10
     return themeForLevel(level).items.slice(0, LEVELS[level - 1].menuItems);
   }
 
@@ -90,11 +92,12 @@
     let prev = null;
     for (const l of LEVELS) {
       if (prev && l.level !== prev.level + 1) issues.push(`level numbers not sequential: ${l.level}`);
-      if (l.menuItems !== 10) issues.push(`L${l.level} menuItems ${l.menuItems}`);
+      if (l.menuItems !== 8) issues.push(`L${l.level} menuItems ${l.menuItems}`);
+      if (menuForLevel(l.level).length !== 8) issues.push(`L${l.level} shift menu size`);
       if (l.qtyMax !== 10) issues.push(`L${l.level} qtyMax ${l.qtyMax}`);
       if (l.target !== 60) issues.push(`L${l.level} target ${l.target}`);
       if (l.patience < 15 || l.patience > 110) issues.push(`L${l.level} patience ${l.patience}`);
-      if (l.maxOnBelt !== 35) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
+      if (l.maxOnBelt !== 40) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
       if (l.beltSpeed < 60 || l.beltSpeed > 220) issues.push(`L${l.level} beltSpeed ${l.beltSpeed}`);
       if (l.refillMs < 1500 || l.refillMs > 2600) issues.push(`L${l.level} refillMs ${l.refillMs}`);
       if (prev) {

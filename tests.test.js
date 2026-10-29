@@ -17,12 +17,12 @@ ok("exactly 4 levels (one per restaurant), all invariants hold", () => {
   const issues = C.verifyLevels();
   assert.deepStrictEqual(issues, []);
 });
-ok("every level is hard identically: 10-item menu, max 10 demand, 60 customers", () => {
+ok("every level is hard identically: 8-item menu, max 10 demand, 60 customers", () => {
   for (const l of C.LEVELS) {
-    assert.strictEqual(l.menuItems, 10, `L${l.level} menuItems`);
+    assert.strictEqual(l.menuItems, 8, `L${l.level} menuItems`);
     assert.strictEqual(l.qtyMax, 10, `L${l.level} qtyMax`);
     assert.strictEqual(l.target, 60, `L${l.level} target`);
-    assert.strictEqual(l.maxOnBelt, 35, `L${l.level} maxOnBelt`);
+    assert.strictEqual(l.maxOnBelt, 40, `L${l.level} maxOnBelt`);
   }
 });
 ok("60+ guests in the book: 60 to serve + two storm-out slots = 62", () => {
@@ -41,11 +41,14 @@ ok("each theme has at least 10 distinct menu items", () => {
     assert.strictEqual(new Set(t.items).size, t.items.length, t.name + " has dupes");
   }
 });
-ok("menu for a level slices the theme to the level's item count", () => {
+ok("each shift menu: 8 dishes drawn from its theme's 10, all assets kept", () => {
   for (const l of C.LEVELS) {
     const menu = C.menuForLevel(l.level);
-    assert.strictEqual(menu.length, l.menuItems);
-    for (const m of menu) assert.ok(C.themeForLevel(l.level).items.includes(m));
+    assert.strictEqual(menu.length, 8, `L${l.level}`);
+    const theme = C.themeForLevel(l.level).items;
+    for (const m of menu) assert.ok(theme.includes(m), `L${l.level} ${m} off-theme`);
+    assert.strictEqual(new Set(menu).size, 8, `L${l.level} dupes`);
+    assert.strictEqual(theme.length, 10, "theme assets untouched");
   }
 });
 
