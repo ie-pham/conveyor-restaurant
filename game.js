@@ -29,6 +29,7 @@ const $ = (id) => document.getElementById(id);
 const GRAB_R = 40;        // px: how close an item must be to a station to be grabbed
 const JAM_GRACE = 2.5;    // s: belt-jam warning before the level is lost
 const LINE_MAX = 5;       // items per kitchen line queue
+const LOOKAHEAD = 8;      // kitchen peeks this deep for something a seated guest wants
 const SURPLUS = 0.3;       // the kitchen cooks ~30% more than ordered — no scarcity
 const STORE = "beltbite:v1";
 const CUST_FACES = ["🧑‍🍳", "👩‍🍳", "👨‍🍳", "🧑‍🦱", "👵", "🧔", "👧", "🧓"];
@@ -202,7 +203,7 @@ function buildState(level) {
   const lines = [];
   for (let i = 0; i < 4; i++) {
     const q = [];
-    for (let j = 0; j < LINE_MAX + 1 && pool.length; j++) q.push(takeFromPool(pool));
+    for (let j = 0; j < LINE_MAX + 1 && pool.length; j++) q.push(takeFromPool(pool, null));
     lines.push(q);
   }
   return {
@@ -340,8 +341,11 @@ function dish(i) {
   updateHUD();
   // Dishing can trip the jam rule the instant the belt hits capacity.
   S.jam = null;
-  if (S.belt.length >= S.cfg.maxOnBelt && !S.belt.some((b) => activeWants().has(b.type))) {
-    S.jam = { t: 0 };
+  if (S.belt.length >= S.cfg.maxOnBelt) {
+    const want = activeWants();
+    const beltOk = S.belt.some((b) => want.has(b.type));
+    const linesOk = S.lines.some((l) => l.some((it) => want.has(it.type)));
+    if (!beltOk && !linesOk) S.jam = { t: 0 };
   }
 }
 
@@ -411,8 +415,15 @@ function buildRuntimePool(roster) {
 // Deal the next dish strictly from the deck's front — the kitchen just cooks down its
 // production line, so much of it is food no seated guest has ordered yet. (Deck stays exact;
 // src lets us write off a stormed-out customer's food.)
-function takeFromPool(pool) {
-  return pool.length ? pool.shift() : null;
+function takeFromPool(pool, want) {
+  if (!pool.length) return null;
+  if (want && want.size) {
+    const depth = Math.min(LOOKAHEAD, pool.length);
+    for (let i = 0; i < depth; i++) {
+      if (want.has(pool[i].type)) return pool.splice(i, 1)[0];
+    }
+  }
+  return pool.shift();
 }
 
 
@@ -457,12 +468,17 @@ function update(dt) {
   // kitchen line fills — pre-made dishes slide in instantly, no waiting
   for (let i = 0; i < 4; i++) {
     if (S.lines[i].length < LINE_MAX + 1 && S.pool.length) {
-      S.lines[i].push(takeFromPool(S.pool));
+      S.lines[i].push(takeFromPool(S.pool, activeWants()));
       updateLineUI(i);
     }
   }
   // belt jam rule
-  const jammed = beltJammed(S.belt, geo.stations.map((s) => s.cust && s.cust.type), S.cfg.maxOnBelt);
+  const wantTypes = geo.stations.map((s) => s.cust && s.cust.type);
+  const wantSet = new Set(wantTypes.filter(Boolean));
+  const wantedOnBelt = S.belt.some((b) => wantSet.has(b.type));
+  const wantedInLines = S.lines.some((l) => l.some((it) => wantSet.has(it.type)));
+  // a jam only counts when there's no wanted dish anywhere — belt AND lines are dry
+  const jammed = !wantedOnBelt && !wantedInLines && beltJammed(S.belt, wantTypes, S.cfg.maxOnBelt);
   if (jammed) {
     if (!S.jam) S.jam = { t: 0 };
     S.jam.t += dt;
