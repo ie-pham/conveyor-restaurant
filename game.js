@@ -465,6 +465,14 @@ function update(dt) {
     c.patience -= dt;
     if (c.patience <= 0) leaveAngry(st);
   }
+  // last-mile: with 8 guests left, the kitchen reparts the deck so their orders
+  // come first — the finale is never buried under surplus leftovers
+  if (!S.finalized && S.roster.length - S.rosterIdx <= 8) {
+    S.finalized = true;
+    const need = new Set();
+    for (let i = S.rosterIdx; i < S.roster.length; i++) need.add(i);
+    S.pool = S.pool.filter((t) => need.has(t.src)).concat(S.pool.filter((t) => !need.has(t.src)));
+  }
   // kitchen line fills — pre-made dishes slide in instantly, no waiting
   for (let i = 0; i < 4; i++) {
     if (S.lines[i].length < LINE_MAX + 1 && S.pool.length) {
