@@ -18,10 +18,10 @@ function levelCfg(level) {
   return {
     menuItems: Math.min(10, 2 + Math.floor((level - 1) / 3)),
     target: Math.round(10 + (level - 1) * 35 / 49),
-    patience: Math.max(30, Math.round(70 - (level - 1) * 40 / 49)),
-    beltSpeed: Math.round(125 + (level - 1) * 90 / 49),
+    patience: Math.max(20, Math.round(45 - (level - 1) * 25 / 49)),
+    beltSpeed: Math.round(100 + (level - 1) * 70 / 49),
     refillMs: Math.round(2600 - (level - 1) * 800 / 49),
-    maxOnBelt: Math.min(20, qtyMax * 2 + 2),
+    maxOnBelt: Math.min(13, qtyMax + 3), // tight belt: spamming fills it with junk and jams it
     qtyMax
   };
 }

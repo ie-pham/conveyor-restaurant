@@ -1,7 +1,7 @@
 /* game.js — Belt & Bite engine: DOM + rAF, zero build step. */
 "use strict";
 
-const { THEMES, LEVELS, themeForLevel, menuForLevel, beltJammed, levelRoster, makePool, randInt, choice } = GameCore;
+const { THEMES, LEVELS, themeForLevel, menuForLevel, beltJammed, isBoardClear, levelRoster, makePool, randInt, choice } = GameCore;
 
 const $ = (id) => document.getElementById(id);
 
@@ -253,6 +253,13 @@ function leaveAngry(st) {
   st.cust = null;
   // their un-shipped order is written off — the kitchen doesn't produce waste for nothing
   if (S.pool.length) S.pool = S.pool.filter((t) => t.src !== src);
+  // their already-dealt food is written off from the kitchen lines too, so it
+  // can never orphan the board at the end of the level.
+  for (let i = 0; i < S.lines.length; i++) {
+    const before = S.lines[i].length;
+    S.lines[i] = S.lines[i].filter((t) => t.src !== src);
+    if (S.lines[i].length !== before) updateLineUI(i);
+  }
   st.pod.el.classList.add("leave-angry");
   setTimeout(() => {
     st.pod.el.classList.remove("leave-angry");
@@ -282,8 +289,9 @@ function dish(i) {
   if (S.belt.length >= S.cfg.maxOnBelt) { beltNudge(); sfx("block"); return; }
   const line = S.lines[i];
   if (!line.length) { lineNudge(i); sfx("block"); return; }
-  const type = line.shift();
-  S.belt.push({ type, t: 0, el: mkItemEl(type) });
+  const item = line.shift();
+  if (!item) return;
+  S.belt.push({ type: item.type, t: 0, el: mkItemEl(item.type) });
   updateLineUI(i);
   sfx("dish");
   updateHUD();
@@ -338,10 +346,10 @@ function takeFromPool(pool, want) {
   if (want && want.size) {
     const depth = Math.min(POOL_LOOKAHEAD, pool.length);
     for (let i = 0; i < depth; i++) {
-      if (want.has(pool[i].type)) return pool.splice(i, 1)[0].type;
+      if (want.has(pool[i].type)) return pool.splice(i, 1)[0]; // {type, src} — src lets us write off a stormed-out customer's food
     }
   }
-  return pool.shift().type;
+  return pool.shift();
 }
 
 function updateLineUI(i) {
@@ -353,7 +361,7 @@ function updateLineUI(i) {
   for (let k = 0; k < LINE_MAX; k++) {
     const c = document.createElement("div");
     c.className = k < q.length ? "chip" : "chip empty";
-    c.textContent = k < q.length ? q[k] : "";
+    c.textContent = k < q.length ? q[k].type : "";
     qEl.appendChild(c);
   }
   lineEl.classList.toggle("empty", q.length === 0);
@@ -467,8 +475,10 @@ function buildBeltCap() {
 
 function checkEnd() {
   if (S.phase !== "playing") return;
-  if (S.served >= S.cfg.target) win();
-  else if (S.angry >= 3) lose("angry");
+  // The level only ends once every last dish has reached its guest — served count
+  // alone isn't enough; the board must be completely clear.
+  if (S.served >= S.cfg.target && isBoardClear(S.lines, S.belt)) win();
+  else if (S.served < S.cfg.target && S.angry >= 3) lose("angry");
 }
 
 function win() {
@@ -479,8 +489,8 @@ function win() {
   els.winTitle.textContent = S.level === 50
     ? "🏆 You cleared the whole menu — all 50 levels!"
     : `${themeForLevel(S.level).emoji} Level ${S.level} complete!`;
-  els.winStats.innerHTML = `Served <b>${S.served}/${S.cfg.target}</b> · Angry <b>${S.angry}</b><br>Score <b>${S.score}</b>`;
-  els.btnNext.textContent = S.level < 10 ? "Next level →" : "Back to menu";
+  els.winStats.innerHTML = `Served <b>${S.served}</b> (target ${S.cfg.target}) · Angry <b>${S.angry}</b><br>Score <b>${S.score}</b>`;
+  els.btnNext.textContent = S.level < 50 ? "Next level →" : "Back to menu";
   els.modalWin.classList.remove("hidden");
   updateHUD();
 }
@@ -672,7 +682,7 @@ function bind() {
   els.btnPause.addEventListener("click", (e) => { e.stopPropagation(); togglePause(); });
   els.btnQuit.addEventListener("click", showStart);
   els.btnResume.addEventListener("click", togglePause);
-  els.btnNext.addEventListener("click", () => { S.level < 10 ? startLevel(S.level + 1) : showStart(); });
+  els.btnNext.addEventListener("click", () => { S.level < 50 ? startLevel(S.level + 1) : showStart(); });
   els.btnRetry.addEventListener("click", () => { if (S) startLevel(S.level); });
   els.lvlPrev.addEventListener("click", () => setLevelPage(levelPage - 1));
   els.lvlNext.addEventListener("click", () => setLevelPage(levelPage + 1));
@@ -790,7 +800,7 @@ function demoMode(bot, sim) {
       const want = activeWants();
       for (let i = 0; i < 4; i++) {
         const front = S.lines[i][0];
-        if (front && want.has(front) && S.belt.length < S.cfg.maxOnBelt) { dish(i); return; }
+        if (front && want.has(front.type) && S.belt.length < S.cfg.maxOnBelt) { dish(i); return; }
       }
     }, 320);
   } else {
@@ -814,7 +824,7 @@ function simMode() {
       if (S.belt.length < S.cfg.maxOnBelt) {
         for (let j = 0; j < 4; j++) {
           const front = S.lines[j][0];
-          if (front && (churn || want.has(front))) { dish(j); break; }
+          if (front && (churn || want.has(front.type))) { dish(j); break; }
         }
       }
     } else if (S.phase === "won" || S.phase === "lost") {

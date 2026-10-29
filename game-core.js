@@ -67,6 +67,11 @@
     return belt.every((item) => !want.has(item.type));
   }
 
+  // The level only counts as done once every last dish has been eaten.
+  function isBoardClear(lines, belt) {
+    return belt.length === 0 && lines.every((l) => l.length === 0);
+  }
+
   // Sanity checks over the whole level table; returns array of issue strings.
   function verifyLevels() {
     const issues = [];
@@ -77,7 +82,7 @@
       if (l.menuItems < 2 || l.menuItems > 10) issues.push(`L${l.level} menuItems ${l.menuItems}`);
       if (l.target < 10 || l.target > 50) issues.push(`L${l.level} target ${l.target}`);
       if (l.patience < 10 || l.patience > 120) issues.push(`L${l.level} patience ${l.patience}`);
-      if (l.maxOnBelt < 4 || l.maxOnBelt > 24) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
+      if (l.maxOnBelt < 4 || l.maxOnBelt > 16) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
       if (l.qtyMax < 2 || l.qtyMax > 10) issues.push(`L${l.level} qtyMax ${l.qtyMax}`);
       if (prev) {
         if (l.menuItems < prev.menuItems) issues.push(`L${l.level} menuItems decreased`);
@@ -86,7 +91,7 @@
         if (l.beltSpeed < prev.beltSpeed) issues.push(`L${l.level} beltSpeed not increasing`);
         if (l.refillMs > prev.refillMs) issues.push(`L${l.level} refillMs not decreasing`);
         if (l.qtyMax < prev.qtyMax) issues.push(`L${l.level} qtyMax decreased`);
-        if (l.maxOnBelt < prev.maxOnBelt || l.maxOnBelt > l.qtyMax * 2 + 2) issues.push(`L${l.level} maxOnBelt not proportional`);
+        if (l.maxOnBelt < prev.maxOnBelt || l.maxOnBelt !== Math.min(13, l.qtyMax + 3)) issues.push(`L${l.level} maxOnBelt not proportional`);
       }
       // deck validation: fixed roster fits its level and the kitchen stock is exact
       const roster = levelRoster(l.level);
@@ -115,6 +120,7 @@
     themeForLevel,
     menuForLevel,
     beltJammed,
+    isBoardClear,
     levelRoster,
     makePool,
     poolTypeCounts,

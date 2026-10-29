@@ -3,10 +3,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 2,
   "target": 10,
-  "patience": 70,
-  "beltSpeed": 125,
+  "patience": 45,
+  "beltSpeed": 100,
   "refillMs": 2600,
-  "maxOnBelt": 6,
+  "maxOnBelt": 5,
   "qtyMax": 2,
   "roster": [
    [
@@ -62,10 +62,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 2,
   "target": 11,
-  "patience": 69,
-  "beltSpeed": 127,
+  "patience": 44,
+  "beltSpeed": 101,
   "refillMs": 2584,
-  "maxOnBelt": 6,
+  "maxOnBelt": 5,
   "qtyMax": 2,
   "roster": [
    [
@@ -125,10 +125,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 2,
   "target": 11,
-  "patience": 68,
-  "beltSpeed": 129,
+  "patience": 44,
+  "beltSpeed": 103,
   "refillMs": 2567,
-  "maxOnBelt": 6,
+  "maxOnBelt": 5,
   "qtyMax": 2,
   "roster": [
    [
@@ -188,10 +188,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 3,
   "target": 12,
-  "patience": 68,
-  "beltSpeed": 131,
+  "patience": 43,
+  "beltSpeed": 104,
   "refillMs": 2551,
-  "maxOnBelt": 6,
+  "maxOnBelt": 5,
   "qtyMax": 2,
   "roster": [
    [
@@ -255,10 +255,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 3,
   "target": 13,
-  "patience": 67,
-  "beltSpeed": 132,
+  "patience": 43,
+  "beltSpeed": 106,
   "refillMs": 2535,
-  "maxOnBelt": 6,
+  "maxOnBelt": 5,
   "qtyMax": 2,
   "roster": [
    [
@@ -326,10 +326,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 3,
   "target": 14,
-  "patience": 66,
-  "beltSpeed": 134,
+  "patience": 42,
+  "beltSpeed": 107,
   "refillMs": 2518,
-  "maxOnBelt": 8,
+  "maxOnBelt": 6,
   "qtyMax": 3,
   "roster": [
    [
@@ -401,10 +401,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 4,
   "target": 14,
-  "patience": 65,
-  "beltSpeed": 136,
+  "patience": 42,
+  "beltSpeed": 109,
   "refillMs": 2502,
-  "maxOnBelt": 8,
+  "maxOnBelt": 6,
   "qtyMax": 3,
   "roster": [
    [
@@ -476,10 +476,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 4,
   "target": 15,
-  "patience": 64,
-  "beltSpeed": 138,
+  "patience": 41,
+  "beltSpeed": 110,
   "refillMs": 2486,
-  "maxOnBelt": 8,
+  "maxOnBelt": 6,
   "qtyMax": 3,
   "roster": [
    [
@@ -555,10 +555,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 4,
   "target": 16,
-  "patience": 63,
-  "beltSpeed": 140,
+  "patience": 41,
+  "beltSpeed": 111,
   "refillMs": 2469,
-  "maxOnBelt": 8,
+  "maxOnBelt": 6,
   "qtyMax": 3,
   "roster": [
    [
@@ -638,10 +638,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 5,
   "target": 16,
-  "patience": 63,
-  "beltSpeed": 142,
+  "patience": 40,
+  "beltSpeed": 113,
   "refillMs": 2453,
-  "maxOnBelt": 8,
+  "maxOnBelt": 6,
   "qtyMax": 3,
   "roster": [
    [
@@ -721,10 +721,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 5,
   "target": 17,
-  "patience": 62,
-  "beltSpeed": 143,
+  "patience": 40,
+  "beltSpeed": 114,
   "refillMs": 2437,
-  "maxOnBelt": 10,
+  "maxOnBelt": 7,
   "qtyMax": 4,
   "roster": [
    [
@@ -808,10 +808,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 5,
   "target": 18,
-  "patience": 61,
-  "beltSpeed": 145,
+  "patience": 39,
+  "beltSpeed": 116,
   "refillMs": 2420,
-  "maxOnBelt": 10,
+  "maxOnBelt": 7,
   "qtyMax": 4,
   "roster": [
    [
@@ -899,10 +899,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 6,
   "target": 19,
-  "patience": 60,
-  "beltSpeed": 147,
+  "patience": 39,
+  "beltSpeed": 117,
   "refillMs": 2404,
-  "maxOnBelt": 10,
+  "maxOnBelt": 7,
   "qtyMax": 4,
   "roster": [
    [
@@ -994,10 +994,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 6,
   "target": 19,
-  "patience": 59,
-  "beltSpeed": 149,
+  "patience": 38,
+  "beltSpeed": 119,
   "refillMs": 2388,
-  "maxOnBelt": 10,
+  "maxOnBelt": 7,
   "qtyMax": 4,
   "roster": [
    [
@@ -1089,10 +1089,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 6,
   "target": 20,
-  "patience": 59,
-  "beltSpeed": 151,
+  "patience": 38,
+  "beltSpeed": 120,
   "refillMs": 2371,
-  "maxOnBelt": 10,
+  "maxOnBelt": 7,
   "qtyMax": 4,
   "roster": [
    [
@@ -1188,10 +1188,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 7,
   "target": 21,
-  "patience": 58,
-  "beltSpeed": 153,
+  "patience": 37,
+  "beltSpeed": 121,
   "refillMs": 2355,
-  "maxOnBelt": 12,
+  "maxOnBelt": 8,
   "qtyMax": 5,
   "roster": [
    [
@@ -1291,10 +1291,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 7,
   "target": 21,
-  "patience": 57,
-  "beltSpeed": 154,
+  "patience": 37,
+  "beltSpeed": 123,
   "refillMs": 2339,
-  "maxOnBelt": 12,
+  "maxOnBelt": 8,
   "qtyMax": 5,
   "roster": [
    [
@@ -1394,10 +1394,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 7,
   "target": 22,
-  "patience": 56,
-  "beltSpeed": 156,
+  "patience": 36,
+  "beltSpeed": 124,
   "refillMs": 2322,
-  "maxOnBelt": 12,
+  "maxOnBelt": 8,
   "qtyMax": 5,
   "roster": [
    [
@@ -1501,10 +1501,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 8,
   "target": 23,
-  "patience": 55,
-  "beltSpeed": 158,
+  "patience": 36,
+  "beltSpeed": 126,
   "refillMs": 2306,
-  "maxOnBelt": 12,
+  "maxOnBelt": 8,
   "qtyMax": 5,
   "roster": [
    [
@@ -1612,10 +1612,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 8,
   "target": 24,
-  "patience": 54,
-  "beltSpeed": 160,
+  "patience": 35,
+  "beltSpeed": 127,
   "refillMs": 2290,
-  "maxOnBelt": 12,
+  "maxOnBelt": 8,
   "qtyMax": 5,
   "roster": [
    [
@@ -1727,10 +1727,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 8,
   "target": 24,
-  "patience": 54,
-  "beltSpeed": 162,
+  "patience": 35,
+  "beltSpeed": 129,
   "refillMs": 2273,
-  "maxOnBelt": 14,
+  "maxOnBelt": 9,
   "qtyMax": 6,
   "roster": [
    [
@@ -1842,10 +1842,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 9,
   "target": 25,
-  "patience": 53,
-  "beltSpeed": 164,
+  "patience": 34,
+  "beltSpeed": 130,
   "refillMs": 2257,
-  "maxOnBelt": 14,
+  "maxOnBelt": 9,
   "qtyMax": 6,
   "roster": [
    [
@@ -1961,10 +1961,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 9,
   "target": 26,
-  "patience": 52,
-  "beltSpeed": 165,
+  "patience": 34,
+  "beltSpeed": 131,
   "refillMs": 2241,
-  "maxOnBelt": 14,
+  "maxOnBelt": 9,
   "qtyMax": 6,
   "roster": [
    [
@@ -2084,10 +2084,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 9,
   "target": 26,
-  "patience": 51,
-  "beltSpeed": 167,
+  "patience": 33,
+  "beltSpeed": 133,
   "refillMs": 2224,
-  "maxOnBelt": 14,
+  "maxOnBelt": 9,
   "qtyMax": 6,
   "roster": [
    [
@@ -2207,10 +2207,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 27,
-  "patience": 50,
-  "beltSpeed": 169,
+  "patience": 33,
+  "beltSpeed": 134,
   "refillMs": 2208,
-  "maxOnBelt": 14,
+  "maxOnBelt": 9,
   "qtyMax": 6,
   "roster": [
    [
@@ -2334,10 +2334,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 28,
-  "patience": 50,
-  "beltSpeed": 171,
+  "patience": 32,
+  "beltSpeed": 136,
   "refillMs": 2192,
-  "maxOnBelt": 16,
+  "maxOnBelt": 10,
   "qtyMax": 7,
   "roster": [
    [
@@ -2465,10 +2465,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 29,
-  "patience": 49,
-  "beltSpeed": 173,
+  "patience": 32,
+  "beltSpeed": 137,
   "refillMs": 2176,
-  "maxOnBelt": 16,
+  "maxOnBelt": 10,
   "qtyMax": 7,
   "roster": [
    [
@@ -2600,10 +2600,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 29,
-  "patience": 48,
-  "beltSpeed": 175,
+  "patience": 31,
+  "beltSpeed": 139,
   "refillMs": 2159,
-  "maxOnBelt": 16,
+  "maxOnBelt": 10,
   "qtyMax": 7,
   "roster": [
    [
@@ -2735,10 +2735,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 30,
-  "patience": 47,
-  "beltSpeed": 176,
+  "patience": 31,
+  "beltSpeed": 140,
   "refillMs": 2143,
-  "maxOnBelt": 16,
+  "maxOnBelt": 10,
   "qtyMax": 7,
   "roster": [
    [
@@ -2874,10 +2874,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 31,
-  "patience": 46,
-  "beltSpeed": 178,
+  "patience": 30,
+  "beltSpeed": 141,
   "refillMs": 2127,
-  "maxOnBelt": 16,
+  "maxOnBelt": 10,
   "qtyMax": 7,
   "roster": [
    [
@@ -3017,10 +3017,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 31,
-  "patience": 46,
-  "beltSpeed": 180,
+  "patience": 30,
+  "beltSpeed": 143,
   "refillMs": 2110,
-  "maxOnBelt": 18,
+  "maxOnBelt": 11,
   "qtyMax": 8,
   "roster": [
    [
@@ -3160,10 +3160,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 32,
-  "patience": 45,
-  "beltSpeed": 182,
+  "patience": 29,
+  "beltSpeed": 144,
   "refillMs": 2094,
-  "maxOnBelt": 18,
+  "maxOnBelt": 11,
   "qtyMax": 8,
   "roster": [
    [
@@ -3307,10 +3307,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 33,
-  "patience": 44,
-  "beltSpeed": 184,
+  "patience": 29,
+  "beltSpeed": 146,
   "refillMs": 2078,
-  "maxOnBelt": 18,
+  "maxOnBelt": 11,
   "qtyMax": 8,
   "roster": [
    [
@@ -3458,10 +3458,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 34,
-  "patience": 43,
-  "beltSpeed": 186,
+  "patience": 28,
+  "beltSpeed": 147,
   "refillMs": 2061,
-  "maxOnBelt": 18,
+  "maxOnBelt": 11,
   "qtyMax": 8,
   "roster": [
    [
@@ -3613,10 +3613,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 34,
-  "patience": 42,
-  "beltSpeed": 187,
+  "patience": 28,
+  "beltSpeed": 149,
   "refillMs": 2045,
-  "maxOnBelt": 18,
+  "maxOnBelt": 11,
   "qtyMax": 8,
   "roster": [
    [
@@ -3768,10 +3768,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 35,
-  "patience": 41,
-  "beltSpeed": 189,
+  "patience": 27,
+  "beltSpeed": 150,
   "refillMs": 2029,
-  "maxOnBelt": 20,
+  "maxOnBelt": 12,
   "qtyMax": 9,
   "roster": [
    [
@@ -3927,10 +3927,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 36,
-  "patience": 41,
-  "beltSpeed": 191,
+  "patience": 27,
+  "beltSpeed": 151,
   "refillMs": 2012,
-  "maxOnBelt": 20,
+  "maxOnBelt": 12,
   "qtyMax": 9,
   "roster": [
    [
@@ -4090,10 +4090,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 36,
-  "patience": 40,
-  "beltSpeed": 193,
+  "patience": 26,
+  "beltSpeed": 153,
   "refillMs": 1996,
-  "maxOnBelt": 20,
+  "maxOnBelt": 12,
   "qtyMax": 9,
   "roster": [
    [
@@ -4253,10 +4253,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 37,
-  "patience": 39,
-  "beltSpeed": 195,
+  "patience": 26,
+  "beltSpeed": 154,
   "refillMs": 1980,
-  "maxOnBelt": 20,
+  "maxOnBelt": 12,
   "qtyMax": 9,
   "roster": [
    [
@@ -4420,10 +4420,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 38,
-  "patience": 38,
-  "beltSpeed": 197,
+  "patience": 25,
+  "beltSpeed": 156,
   "refillMs": 1963,
-  "maxOnBelt": 20,
+  "maxOnBelt": 12,
   "qtyMax": 9,
   "roster": [
    [
@@ -4591,10 +4591,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 39,
-  "patience": 37,
-  "beltSpeed": 198,
+  "patience": 25,
+  "beltSpeed": 157,
   "refillMs": 1947,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -4766,10 +4766,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 39,
-  "patience": 37,
-  "beltSpeed": 200,
+  "patience": 24,
+  "beltSpeed": 159,
   "refillMs": 1931,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -4941,10 +4941,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 40,
-  "patience": 36,
-  "beltSpeed": 202,
+  "patience": 24,
+  "beltSpeed": 160,
   "refillMs": 1914,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -5120,10 +5120,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 41,
-  "patience": 35,
-  "beltSpeed": 204,
+  "patience": 23,
+  "beltSpeed": 161,
   "refillMs": 1898,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -5303,10 +5303,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 41,
-  "patience": 34,
-  "beltSpeed": 206,
+  "patience": 23,
+  "beltSpeed": 163,
   "refillMs": 1882,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -5486,10 +5486,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 42,
-  "patience": 33,
-  "beltSpeed": 208,
+  "patience": 22,
+  "beltSpeed": 164,
   "refillMs": 1865,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -5673,10 +5673,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 43,
-  "patience": 32,
-  "beltSpeed": 209,
+  "patience": 22,
+  "beltSpeed": 166,
   "refillMs": 1849,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -5864,10 +5864,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 44,
-  "patience": 32,
-  "beltSpeed": 211,
+  "patience": 21,
+  "beltSpeed": 167,
   "refillMs": 1833,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -6059,10 +6059,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 44,
-  "patience": 31,
-  "beltSpeed": 213,
+  "patience": 21,
+  "beltSpeed": 169,
   "refillMs": 1816,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [
@@ -6254,10 +6254,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 45,
-  "patience": 30,
-  "beltSpeed": 215,
+  "patience": 20,
+  "beltSpeed": 170,
   "refillMs": 1800,
-  "maxOnBelt": 20,
+  "maxOnBelt": 13,
   "qtyMax": 10,
   "roster": [
    [

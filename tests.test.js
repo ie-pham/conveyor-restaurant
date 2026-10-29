@@ -40,12 +40,13 @@ ok("max demand reaches 10 items at the late levels (45-50)", () => {
   for (const l of late) assert.strictEqual(l.qtyMax, 10);
   for (const l of C.LEVELS) assert.ok(l.qtyMax >= 2 && l.qtyMax <= 10);
 });
-ok("belt capacity is proportionate to demand (2 per possible item + 2, cap 20)", () => {
+ok("belt capacity is proportionate to demand (one full order + 3, cap 13)", () => {
   for (const l of C.LEVELS) {
-    assert.strictEqual(l.maxOnBelt, Math.min(20, l.qtyMax * 2 + 2), `L${l.level}`);
+    assert.strictEqual(l.maxOnBelt, Math.min(13, l.qtyMax + 3), `L${l.level}`);
+    assert.ok(l.maxOnBelt >= l.qtyMax, `L${l.level} belt must hold a full order`);
   }
-  assert.strictEqual(C.LEVELS[0].maxOnBelt, 6);
-  assert.strictEqual(C.LEVELS[49].maxOnBelt, 20);
+  assert.strictEqual(C.LEVELS[0].maxOnBelt, 5);
+  assert.strictEqual(C.LEVELS[49].maxOnBelt, 13);
 });
 
 console.log("themes:");
@@ -151,6 +152,12 @@ ok("angry-leave write-off never removes more than that customer's order", () => 
       assert.ok(removed >= 0 && removed <= angry.qty, "write-off bounded by the order");
     }
   }
+});
+ok("isBoardClear: a level only completes once every plate is eaten", () => {
+  assert.strictEqual(C.isBoardClear([[], [], [], []], []), true);
+  assert.strictEqual(C.isBoardClear([[{ type: "🍣" }], [], [], []], []), false);
+  assert.strictEqual(C.isBoardClear([[], [], [], []], [{ type: "🍣" }]), false);
+  assert.strictEqual(C.isBoardClear([[{ type: "🍣" }], [], [], []], [{ type: "🍙" }]), false);
 });
 ok("same-type items are fungible: type supply always covers the seated demand", () => {
   for (let trial = 0; trial < 200; trial++) {
