@@ -106,14 +106,19 @@ ok("deck totals exactly equal the roster's orders, per type and overall", () => 
     assert.strictEqual(pool.length, total, `L${lvl} total`);
   }
 });
-ok("deck front chunk = the next customer's order (nothing buried)", () => {
+ok("kitchen deck is shuffled: same multiset as the roster, but order is scrambled", () => {
   for (let lvl = 1; lvl <= C.LEVELS.length; lvl++) {
-    const cfg = C.LEVELS[lvl - 1];
     const roster = C.levelRoster(lvl);
-    const pool = C.makePool(roster);
-    const expected = [];
-    for (const c of roster) for (let i = 0; i < c.qty; i++) expected.push(c.type);
-    assert.deepStrictEqual(pool.map((t) => t.type), expected, `L${lvl}`);
+    const pool = C.levelPool(lvl);
+    const need = new Map();
+    let total = 0;
+    for (const c of roster) { need.set(c.type, (need.get(c.type) || 0) + c.qty); total += c.qty; }
+    assert.strictEqual(pool.length, total, `L${lvl} length`);
+    const counts = C.poolTypeCounts(pool);
+    for (const [t, n] of need) assert.strictEqual(counts.get(t) || 0, n, `L${lvl} ${t}`);
+    // not in roster-chunk order: scrambled means at least one neighboring pair is "wrong"-ish
+    const ordered = C.makePool(roster).map((t) => t.type);
+    assert.notDeepStrictEqual(pool.map((t) => t.type).slice(0, 12), ordered.slice(0, 12), `L${lvl} not shuffled?`);
   }
 });
 ok("angry-leave write-off never removes more than that customer's order", () => {

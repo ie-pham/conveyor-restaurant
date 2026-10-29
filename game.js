@@ -1,7 +1,7 @@
 /* game.js — Belt & Bite engine: DOM + rAF, zero build step. */
 "use strict";
 
-const { THEMES, LEVELS, themeForLevel, menuForLevel, beltJammed, customersRemain, levelRoster, makePool, randInt, choice } = GameCore;
+const { THEMES, LEVELS, themeForLevel, menuForLevel, beltJammed, customersRemain, levelRoster, levelPool, randInt, choice } = GameCore;
 
 // OpenMoji sprite set for dishes (img/food/), twemoji for everything else
 const CUSTOM_FOOD = new Set(GameCore.THEMES.flatMap((t) => t.items));
@@ -192,7 +192,7 @@ function buildState(level) {
   // Fixed roster + exact kitchen stock: the kitchen produces precisely what the
   // roster will order (target to serve + up-to-2 angry slack).
   const roster = levelRoster(level);
-  const pool = makePool(roster);
+  const pool = levelPool(level); // pre-shuffled production line — exact multiset, scambled order
   // startup fill: every line opens with LINE_MAX items, drawn freely from the deck front
   const lines = [];
   for (let i = 0; i < 4; i++) {
@@ -375,12 +375,6 @@ function activeWants() {
 
 // Deal the next dish from the exact deck: prefer a nearby item a seated customer
 // wants (depth-bounded lookahead), otherwise the deck's front (the next customer's order).
-// Only deal food for customers who can still actually be seated (4 chairs + next in line),
-// so the kitchen never pre-cooks for people who were never going to arrive.
-function canDealFromPool(pool, rosterIdx) {
-  return pool.length > 0 && pool[0].src <= rosterIdx + 4;
-}
-
 // Deal the next dish strictly from the deck's front — the kitchen just cooks down its
 // production line, so much of it is food no seated guest has ordered yet. (Deck stays exact;
 // src lets us write off a stormed-out customer's food.)
@@ -429,7 +423,7 @@ function update(dt) {
   }
   // kitchen line fills (gently paced)
   for (let i = 0; i < 4; i++) {
-    if (S.lines[i].length < LINE_MAX + 1 && S.lineFill[i] <= S.time && canDealFromPool(S.pool, S.rosterIdx)) {
+    if (S.lines[i].length < LINE_MAX + 1 && S.lineFill[i] <= S.time && S.pool.length) {
       S.lines[i].push(takeFromPool(S.pool));
       S.lineFill[i] = S.time + FILL_DELAY;
       updateLineUI(i);

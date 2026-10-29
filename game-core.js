@@ -34,6 +34,15 @@
     return l ? l.roster.map(([type, qty]) => ({ type, qty })) : [];
   }
 
+  // The kitchen's production line: a pre-shuffled mix whose per-type totals exactly match
+  // the roster's orders (each plate tagged with the customer it was booked for).
+  function levelPool(level) {
+    const l = RAW[level - 1];
+    if (!l || !l.pool) return [];
+    const roster = levelRoster(level);
+    return l.pool.map((src) => ({ type: roster[src].type, src }));
+  }
+
   function randInt(a, b) { return a + Math.floor(Math.random() * (b - a + 1)); }
   function choice(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
@@ -109,6 +118,12 @@
       for (const [t, n] of totals) {
         if (pool.get(t) !== n) issues.push(`L${l.level} deck mismatch for ${t}`);
       }
+      const shuffled = levelPool(l.level);
+      if (shuffled.length !== deckTotal) issues.push(`L${l.level} shuffled deck length ${shuffled.length}`);
+      const sc = poolTypeCounts(shuffled);
+      for (const [t, n] of totals) {
+        if (sc.get(t) !== n) issues.push(`L${l.level} shuffled deck totals off for ${t}`);
+      }
       prev = l;
     }
     return issues;
@@ -122,6 +137,7 @@
     beltJammed,
     customersRemain,
     levelRoster,
+    levelPool,
     makePool,
     poolTypeCounts,
     randInt,
