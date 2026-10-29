@@ -67,9 +67,10 @@
     return belt.every((item) => !want.has(item.type));
   }
 
-  // The level only counts as done once every last dish has been eaten.
-  function isBoardClear(lines, belt) {
-    return belt.length === 0 && lines.every((l) => l.length === 0);
+  // The shift is over when the customer book is empty and no one is seated anymore —
+  // leftover plates (e.g. a stormed-out order already circling) must never block the finish.
+  function customersRemain(rosterIdx, rosterLen, occupiedSeats) {
+    return rosterIdx < rosterLen || occupiedSeats > 0;
   }
 
   // Sanity checks over the level table; returns array of issue strings.
@@ -119,7 +120,7 @@
     themeForLevel,
     menuForLevel,
     beltJammed,
-    isBoardClear,
+    customersRemain,
     levelRoster,
     makePool,
     poolTypeCounts,

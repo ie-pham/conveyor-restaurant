@@ -132,11 +132,11 @@ ok("angry-leave write-off never removes more than that customer's order", () => 
     }
   }
 });
-ok("isBoardClear: a level only completes once every plate is eaten", () => {
-  assert.strictEqual(C.isBoardClear([[], [], [], []], []), true);
-  assert.strictEqual(C.isBoardClear([[{ type: "🍣" }], [], [], []], []), false);
-  assert.strictEqual(C.isBoardClear([[], [], [], []], [{ type: "🍣" }]), false);
-  assert.strictEqual(C.isBoardClear([[{ type: "🍣" }], [], [], []], [{ type: "🍙" }]), false);
+ok("customersRemain: the shift only ends when the book is empty and no one is seated", () => {
+  assert.strictEqual(C.customersRemain(52, 52, 0), false);  // all spawned, no seats — shift over
+  assert.strictEqual(C.customersRemain(51, 52, 0), true);   // one still to sit
+  assert.strictEqual(C.customersRemain(52, 52, 1), true);   // someone still eating
+  assert.strictEqual(C.customersRemain(10, 52, 4), true);   // mid-shift
 });
 ok("same-type items are fungible: type supply always covers the seated demand", () => {
   for (let trial = 0; trial < 200; trial++) {

@@ -1,7 +1,7 @@
 /* game.js — Belt & Bite engine: DOM + rAF, zero build step. */
 "use strict";
 
-const { THEMES, LEVELS, themeForLevel, menuForLevel, beltJammed, isBoardClear, levelRoster, makePool, randInt, choice } = GameCore;
+const { THEMES, LEVELS, themeForLevel, menuForLevel, beltJammed, customersRemain, levelRoster, makePool, randInt, choice } = GameCore;
 
 // OpenMoji sprite set for dishes (img/food/), twemoji for everything else
 const CUSTOM_FOOD = new Set(GameCore.THEMES.flatMap((t) => t.items));
@@ -295,6 +295,10 @@ function leaveAngry(st) {
     S.lines[i] = S.lines[i].filter((t) => t.src !== src);
     if (S.lines[i].length !== before) { S.lineFill[i] = S.time + FILL_DELAY; updateLineUI(i); }
   }
+  // their plate may already be circling the belt — pull it so it can't orphan the finish
+  const stray = S.belt.filter((b) => b.src === src);
+  S.belt = S.belt.filter((b) => b.src !== src);
+  for (const b of stray) b.el.remove();
   st.pod.el.classList.add("leave-angry");
   setTimeout(() => {
     st.pod.el.classList.remove("leave-angry");
@@ -326,7 +330,7 @@ function dish(i) {
   if (!line.length) { lineNudge(i); sfx("block"); return; }
   const item = line.shift();
   if (!item) return;
-  S.belt.push({ type: item.type, t: 0, el: mkItemEl(item.type) });
+  S.belt.push({ type: item.type, src: item.src, t: 0, el: mkItemEl(item.type) });
   S.lineFill[i] = S.time + FILL_DELAY; // next dish lands after a short beat — pacing, not restock
   updateLineUI(i);
   sfx("dish");
@@ -491,9 +495,10 @@ function buildBeltCap() {
 
 function checkEnd() {
   if (S.phase !== "playing") return;
-  // The level only ends once every last dish has reached its guest — served count
-  // alone isn't enough; the board must be completely clear.
-  if (S.served >= S.cfg.target && isBoardClear(S.lines, S.belt)) win();
+  const occupied = geo.stations.filter((s) => s.cust).length;
+  // The level ends when the shift is over: target served and nobody left to seat —
+  // leftover plates (e.g. a stormed-out order already on the belt) don't block the finish.
+  if (S.served >= S.cfg.target && !customersRemain(S.rosterIdx, S.roster.length, occupied)) win();
   else if (S.served < S.cfg.target && S.angry >= 3) lose("angry");
 }
 
