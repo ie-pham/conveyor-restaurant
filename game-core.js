@@ -82,9 +82,9 @@
       if (prev && l.level !== prev.level + 1) issues.push(`level numbers not sequential: ${l.level}`);
       if (l.menuItems !== 10) issues.push(`L${l.level} menuItems ${l.menuItems}`);
       if (l.qtyMax !== 10) issues.push(`L${l.level} qtyMax ${l.qtyMax}`);
-      if (l.target !== 45) issues.push(`L${l.level} target ${l.target}`);
-      if (l.patience < 15 || l.patience > 40) issues.push(`L${l.level} patience ${l.patience}`);
-      if (l.maxOnBelt !== 40) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
+      if (l.target !== 60) issues.push(`L${l.level} target ${l.target}`);
+      if (l.patience < 15 || l.patience > 110) issues.push(`L${l.level} patience ${l.patience}`);
+      if (l.maxOnBelt !== 35) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
       if (l.beltSpeed < 60 || l.beltSpeed > 220) issues.push(`L${l.level} beltSpeed ${l.beltSpeed}`);
       if (l.refillMs < 1500 || l.refillMs > 2600) issues.push(`L${l.level} refillMs ${l.refillMs}`);
       if (prev) {

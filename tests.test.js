@@ -17,16 +17,16 @@ ok("exactly 4 levels (one per restaurant), all invariants hold", () => {
   const issues = C.verifyLevels();
   assert.deepStrictEqual(issues, []);
 });
-ok("every level is hard identically: 10-item menu, max 10 demand, 45 customers", () => {
+ok("every level is hard identically: 10-item menu, max 10 demand, 60 customers", () => {
   for (const l of C.LEVELS) {
     assert.strictEqual(l.menuItems, 10, `L${l.level} menuItems`);
     assert.strictEqual(l.qtyMax, 10, `L${l.level} qtyMax`);
-    assert.strictEqual(l.target, 45, `L${l.level} target`);
-    assert.strictEqual(l.maxOnBelt, 40, `L${l.level} maxOnBelt`);
+    assert.strictEqual(l.target, 60, `L${l.level} target`);
+    assert.strictEqual(l.maxOnBelt, 35, `L${l.level} maxOnBelt`);
   }
 });
-ok("a long shift: 45 customers per level leaves room for two storm-outs", () => {
-  for (const l of C.LEVELS) assert.strictEqual(C.levelRoster(l.level).length, 47, `L${l.level}`);
+ok("60+ guests in the book: 60 to serve + two storm-out slots = 62", () => {
+  for (const l of C.LEVELS) assert.strictEqual(C.levelRoster(l.level).length, 62, `L${l.level}`);
 });
 
 console.log("themes:");

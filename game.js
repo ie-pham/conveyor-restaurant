@@ -29,7 +29,7 @@ const $ = (id) => document.getElementById(id);
 const GRAB_R = 40;        // px: how close an item must be to a station to be grabbed
 const JAM_GRACE = 2.5;    // s: belt-jam warning before the level is lost
 const LINE_MAX = 5;       // items per kitchen line queue
-const POOL_LOOKAHEAD = 3; // refills peek this deep for an item a seated customer wants (deck stays exact)
+const FILL_DELAY = 0.75;   // s between kitchen line fills — paces the shift out
 const STORE = "beltbite:v1";
 const CUST_FACES = ["🧑‍🍳", "👩‍🍳", "👨‍🍳", "🧑‍🦱", "👵", "🧔", "👧", "🧓"];
 
@@ -197,7 +197,7 @@ function buildState(level) {
   const lines = [];
   for (let i = 0; i < 4; i++) {
     const q = [];
-    for (let j = 0; j < LINE_MAX + 1 && pool.length; j++) q.push(takeFromPool(pool, null));
+    for (let j = 0; j < LINE_MAX + 1 && pool.length; j++) q.push(takeFromPool(pool));
     lines.push(q);
   }
   return {
@@ -208,6 +208,7 @@ function buildState(level) {
     roster, pool, rosterIdx: 0,
     belt: [],
     lines,
+    lineFill: [0, 0, 0, 0],
     jam: null
   };
 }
@@ -292,7 +293,7 @@ function leaveAngry(st) {
   for (let i = 0; i < S.lines.length; i++) {
     const before = S.lines[i].length;
     S.lines[i] = S.lines[i].filter((t) => t.src !== src);
-    if (S.lines[i].length !== before) { topUpLine(i); updateLineUI(i); }
+    if (S.lines[i].length !== before) { S.lineFill[i] = S.time + FILL_DELAY; updateLineUI(i); }
   }
   st.pod.el.classList.add("leave-angry");
   setTimeout(() => {
@@ -326,7 +327,7 @@ function dish(i) {
   const item = line.shift();
   if (!item) return;
   S.belt.push({ type: item.type, t: 0, el: mkItemEl(item.type) });
-  topUpLine(i); // the next pre-made dish slides into place immediately — no restocking lag
+  S.lineFill[i] = S.time + FILL_DELAY; // next dish lands after a short beat — pacing, not restock
   updateLineUI(i);
   sfx("dish");
   updateHUD();
@@ -376,24 +377,14 @@ function canDealFromPool(pool, rosterIdx) {
   return pool.length > 0 && pool[0].src <= rosterIdx + 4;
 }
 
-function takeFromPool(pool, want) {
-  if (!pool.length) return null;
-  if (want && want.size) {
-    const depth = Math.min(POOL_LOOKAHEAD, pool.length);
-    for (let i = 0; i < depth; i++) {
-      if (want.has(pool[i].type)) return pool.splice(i, 1)[0]; // {type, src} — src lets us write off a stormed-out customer's food
-    }
-  }
-  return pool.shift();
+// Deal the next dish strictly from the deck's front — the kitchen just cooks down its
+// production line, so much of it is food no seated guest has ordered yet. (Deck stays exact;
+// src lets us write off a stormed-out customer's food.)
+function takeFromPool(pool) {
+  return pool.length ? pool.shift() : null;
 }
 
-// Keep a line topped up straight from the pre-made deck. It holds one extra dish
-// that the queue clips — so a full line visibly "continues past" the bottom edge.
-function topUpLine(i) {
-  while (S.lines[i].length < LINE_MAX + 1 && canDealFromPool(S.pool, S.rosterIdx)) {
-    S.lines[i].push(takeFromPool(S.pool, activeWants()));
-  }
-}
+
 
 function updateLineUI(i) {
   const lineEl = els.lines.children[i];
@@ -431,6 +422,14 @@ function update(dt) {
     if (!c) continue;
     c.patience -= dt;
     if (c.patience <= 0) leaveAngry(st);
+  }
+  // kitchen line fills (gently paced)
+  for (let i = 0; i < 4; i++) {
+    if (S.lines[i].length < LINE_MAX + 1 && S.lineFill[i] <= S.time && canDealFromPool(S.pool, S.rosterIdx)) {
+      S.lines[i].push(takeFromPool(S.pool));
+      S.lineFill[i] = S.time + FILL_DELAY;
+      updateLineUI(i);
+    }
   }
   // belt jam rule
   const jammed = beltJammed(S.belt, geo.stations.map((s) => s.cust && s.cust.type), S.cfg.maxOnBelt);

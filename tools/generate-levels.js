@@ -17,11 +17,11 @@ const THEMES = [
 function levelCfg(level) {
   return {
     menuItems: 10,
-    target: 45,
-    patience: 35, // easy-going patience — slow belt, forgiving schedule
-    beltSpeed: 83, // half speed — food rolls along leisurely, like it's actually premade
+    target: 60, // longer shift — 60 happy customers, 62 in the book
+    patience: 70, // 2x patience — blind-dealing kitchen needs the slack
+    beltSpeed: 70, // a touch slower — draws each shift out
     refillMs: 1900,
-    maxOnBelt: 40, // room for 4 customers x up to 10 dishes each,
+    maxOnBelt: 35, // tighter belt — a bit less room to hoard,
     qtyMax: 10
   };
 }
@@ -44,7 +44,8 @@ for (let level = 1; level <= THEMES.length; level++) {
   const menu = THEMES[level - 1].items;
   const roster = [];
   for (let i = 0; i < cfg.target + 2; i++) {
-    roster.push([menu[Math.floor(rng() * menu.length)], 1 + Math.floor(rng() * cfg.qtyMax)]);
+    // demand is 5..10 — every order is a feast, shifts run long
+    roster.push([menu[Math.floor(rng() * menu.length)], 5 + Math.floor(rng() * (cfg.qtyMax - 4))]);
   }
   levels.push({ ...cfg, roster });
 }
