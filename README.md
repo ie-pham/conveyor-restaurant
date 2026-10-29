@@ -41,3 +41,11 @@ Controls: `1–4` dish · `P` pause · `M` mute · `R` restart level · `Enter` 
 | `tests.test.js` | node logic tests — `node tests.test.js` |
 
 `?demo` in the URL auto-plays level 1 (handy for screenshots). `?sim=1&lvl=N` runs a bot at a level; add `&churn=1` for a bot that dishes everything.
+
+## Art & assets
+
+- Dish icons: **OpenMoji** by hfg-gmuend, licensed under **CC BY-SA 4.0** (bundled locally under
+  `img/food/`; refresh with `node tools/fetch-food-icons.js`). Judge against `preview-icons.html`.
+- Faces & UI glyphs: **Twemoji** graphics by Twitter/X, Inc and contributors, licensed under
+  **CC-BY 4.0** (bundled locally under `img/`; regenerate with `node tools/fetch-assets.js`).
+- Fonts: [Fredoka](https://fonts.google.com/specimen/Fredoka) (OFL) via Google Fonts, with system fallbacks.

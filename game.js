@@ -3,6 +3,27 @@
 
 const { THEMES, LEVELS, themeForLevel, menuForLevel, beltJammed, isBoardClear, levelRoster, makePool, randInt, choice } = GameCore;
 
+// OpenMoji sprite set for dishes (img/food/), twemoji for everything else
+const CUSTOM_FOOD = new Set(GameCore.THEMES.flatMap((t) => t.items));
+function emojiCps(e) {
+  return [...e].filter((c) => c !== "\uFE0F").map((c) => c.codePointAt(0).toString(16)).join("-");
+}
+function artEl(e) {
+  const img = document.createElement("img");
+  img.className = "art";
+  img.alt = e;
+  const food = CUSTOM_FOOD.has(e);
+  img.src = (food ? "img/food/" : "img/") + emojiCps(e) + ".png";
+  img.addEventListener("error", () => { img.replaceWith(artText(e)); }, { once: true });
+  return img;
+}
+function artText(e) {
+  const s = document.createElement("span");
+  s.className = "art-fallback";
+  s.textContent = e;
+  return s;
+}
+
 const $ = (id) => document.getElementById(id);
 
 const GRAB_R = 40;        // px: how close an item must be to a station to be grabbed
@@ -130,11 +151,12 @@ function buildGeo() {
     })
   };
 
-  els.beltTrack.style.left = (x0 - 9) + "px";
-  els.beltTrack.style.top = (y0 - 9) + "px";
-  els.beltTrack.style.width = (trackW + 18) + "px";
-  els.beltTrack.style.height = (trackH + 18) + "px";
-  els.beltTrack.style.borderRadius = (corner + 9) + "px";
+  const band = 15; // half the belt thickness — the belt straddles the item path
+  els.beltTrack.style.left = (x0 - band) + "px";
+  els.beltTrack.style.top = (y0 - band) + "px";
+  els.beltTrack.style.width = (trackW + band * 2) + "px";
+  els.beltTrack.style.height = (trackH + band * 2) + "px";
+  els.beltTrack.style.borderRadius = (corner + band) + "px";
   els.beltMouth.style.left = cx + "px";
   els.beltMouth.style.top = y0 + "px";
   els.beltMouth.style.transform = "translate(-50%, -50%)";
@@ -175,7 +197,6 @@ function buildState(level) {
     roster, pool, rosterIdx: 0,
     belt: [],
     lines,
-    lineTimers: [randInt(0, 500), randInt(0, 500), randInt(0, 500), randInt(0, 500)],
     jam: null
   };
 }
@@ -203,7 +224,8 @@ function makePod(st) {
 function setVacant(st) {
   st.cust = null;
   st.pod.el.classList.add("vacant");
-  st.pod.cust.textContent = "🪑";
+  st.pod.cust.textContent = "";
+  st.pod.cust.appendChild(artEl("🪑"));
   st.pod.want.textContent = "· · ·";
   st.pod.fill.style.width = "0%";
 }
@@ -218,10 +240,11 @@ function spawnCustomer() {
   S.rosterIdx++;
   st.cust = cust;
   st.pod.el.classList.remove("vacant", "leave-happy", "leave-angry");
-  st.pod.cust.textContent = choice(CUST_FACES);
+  st.pod.cust.textContent = "";
+  st.pod.cust.appendChild(artEl(choice(CUST_FACES)));
   st.pod.want.textContent = "";
   const big = document.createElement("big");
-  big.textContent = cust.type;
+  big.appendChild(artEl(cust.type));
   st.pod.want.appendChild(big);
   st.pod.want.appendChild(document.createTextNode(" ×" + cust.qty));
   st.pod.fill.className = "patience-fill";
@@ -258,7 +281,7 @@ function leaveAngry(st) {
   for (let i = 0; i < S.lines.length; i++) {
     const before = S.lines[i].length;
     S.lines[i] = S.lines[i].filter((t) => t.src !== src);
-    if (S.lines[i].length !== before) updateLineUI(i);
+    if (S.lines[i].length !== before) { topUpLine(i); updateLineUI(i); }
   }
   st.pod.el.classList.add("leave-angry");
   setTimeout(() => {
@@ -277,7 +300,7 @@ function leaveAngry(st) {
 function mkItemEl(type) {
   const el = document.createElement("div");
   el.className = "belt-item";
-  el.textContent = type;
+  el.appendChild(artEl(type));
   els.beltItems.appendChild(el);
   el.classList.add("pop");
   setTimeout(() => el.classList.remove("pop"), 240);
@@ -292,6 +315,7 @@ function dish(i) {
   const item = line.shift();
   if (!item) return;
   S.belt.push({ type: item.type, t: 0, el: mkItemEl(item.type) });
+  topUpLine(i); // the next pre-made dish slides into place immediately — no restocking lag
   updateLineUI(i);
   sfx("dish");
   updateHUD();
@@ -319,7 +343,7 @@ function consume(item, st, pos) {
   } else {
     st.pod.want.textContent = "";
     const big = document.createElement("big");
-    big.textContent = cust.type;
+    big.appendChild(artEl(cust.type));
     st.pod.want.appendChild(big);
     st.pod.want.appendChild(document.createTextNode(" ×" + cust.qty));
     sfx("grab");
@@ -352,6 +376,13 @@ function takeFromPool(pool, want) {
   return pool.shift();
 }
 
+// Keep a line topped up to its 5 slots straight from the pre-made deck.
+function topUpLine(i) {
+  while (S.lines[i].length < LINE_MAX && canDealFromPool(S.pool, S.rosterIdx)) {
+    S.lines[i].push(takeFromPool(S.pool, activeWants()));
+  }
+}
+
 function updateLineUI(i) {
   const lineEl = els.lines.children[i];
   const q = S.lines[i];
@@ -361,12 +392,9 @@ function updateLineUI(i) {
   for (let k = 0; k < LINE_MAX; k++) {
     const c = document.createElement("div");
     c.className = k < q.length ? "chip" : "chip empty";
-    c.textContent = k < q.length ? q[k].type : "";
+    if (k < q.length) c.appendChild(artEl(q[k].type));
     qEl.appendChild(c);
   }
-  lineEl.classList.toggle("empty", q.length === 0);
-  const poolLeft = S.pool ? S.pool.length : 0;
-  lineEl.querySelector(".line-status").textContent = (q.length === 0 && poolLeft) ? "restocking…" : "";
 }
 
 /* ---------------- update loop ---------------- */
@@ -391,17 +419,6 @@ function update(dt) {
     if (!c) continue;
     c.patience -= dt;
     if (c.patience <= 0) leaveAngry(st);
-  }
-  // kitchen refills
-  for (let i = 0; i < 4; i++) {
-    if (S.lines[i].length < LINE_MAX && canDealFromPool(S.pool, S.rosterIdx)) {
-      S.lineTimers[i] -= dt * 1000;
-      if (S.lineTimers[i] <= 0) {
-        S.lineTimers[i] = S.cfg.refillMs * (0.8 + Math.random() * 0.5);
-        S.lines[i].push(takeFromPool(S.pool, activeWants()));
-        updateLineUI(i);
-      }
-    }
   }
   // belt jam rule
   const jammed = beltJammed(S.belt, geo.stations.map((s) => s.cust && s.cust.type), S.cfg.maxOnBelt);
@@ -483,14 +500,14 @@ function checkEnd() {
 
 function win() {
   S.phase = "won";
-  best = Math.max(best, Math.min(50, S.level + 1));
+  best = Math.max(best, Math.min(LEVELS.length, S.level + 1));
   save();
   sfx("win");
-  els.winTitle.textContent = S.level === 50
-    ? "🏆 You cleared the whole menu — all 50 levels!"
+  els.winTitle.textContent = S.level === LEVELS.length
+    ? "🏆 You ran every restaurant the whole shift!"  
     : `${themeForLevel(S.level).emoji} Level ${S.level} complete!`;
   els.winStats.innerHTML = `Served <b>${S.served}</b> (target ${S.cfg.target}) · Angry <b>${S.angry}</b><br>Score <b>${S.score}</b>`;
-  els.btnNext.textContent = S.level < 50 ? "Next level →" : "Back to menu";
+  els.btnNext.textContent = S.level < LEVELS.length ? "Next level →" : "Back to menu";
   els.modalWin.classList.remove("hidden");
   updateHUD();
 }
@@ -564,13 +581,13 @@ let suppressClickUntil = 0; // set briefly after a drag so a swipe isn't read as
 function buildLevelGrid() {
   els.levelTrack.textContent = "";
   els.levelDots.textContent = "";
-  pageCount = Math.ceil(50 / PAGE_SIZE);
+  pageCount = Math.ceil(LEVELS.length / PAGE_SIZE);
   levelPage = Math.max(0, Math.min(pageCount - 1, Math.floor((best - 1) / PAGE_SIZE)));
   for (let p = 0; p < pageCount; p++) {
     const pageEl = document.createElement("div");
     pageEl.className = "level-page";
     const from = p * PAGE_SIZE + 1;
-    const to = Math.min(50, from + PAGE_SIZE - 1);
+    const to = Math.min(LEVELS.length, from + PAGE_SIZE - 1);
     for (let i = from; i <= to; i++) pageEl.appendChild(makeLevelTile(i));
     els.levelTrack.appendChild(pageEl);
     const dot = document.createElement("button");
@@ -580,8 +597,8 @@ function buildLevelGrid() {
     els.levelDots.appendChild(dot);
   }
   setLevelPage(levelPage);
-  els.bestLine.textContent = best >= 50
-    ? "All 50 levels unlocked — you run this kitchen. 🏆"
+  els.bestLine.textContent = best >= LEVELS.length
+    ? "All kitchens cleared — you run this town. 🏆"
     : `Levels cleared: ${best - 1} · next up Level ${best}`;
 }
 
@@ -682,7 +699,7 @@ function bind() {
   els.btnPause.addEventListener("click", (e) => { e.stopPropagation(); togglePause(); });
   els.btnQuit.addEventListener("click", showStart);
   els.btnResume.addEventListener("click", togglePause);
-  els.btnNext.addEventListener("click", () => { S.level < 50 ? startLevel(S.level + 1) : showStart(); });
+  els.btnNext.addEventListener("click", () => { S.level < LEVELS.length ? startLevel(S.level + 1) : showStart(); });
   els.btnRetry.addEventListener("click", () => { if (S) startLevel(S.level); });
   els.lvlPrev.addEventListener("click", () => setLevelPage(levelPage - 1));
   els.lvlNext.addEventListener("click", () => setLevelPage(levelPage + 1));
@@ -743,7 +760,7 @@ function bind() {
 function loadStore() {
   try {
     const s = JSON.parse(localStorage.getItem(STORE) || "{}");
-    best = Math.max(1, Math.min(50, s.best || 1));
+    best = Math.max(1, Math.min(LEVELS.length, s.best || 1));
     muted = !!s.muted;
   } catch (e) { /* first run */ }
   syncMute();
@@ -771,16 +788,9 @@ function buildLines() {
   for (let i = 0; i < 4; i++) {
     const div = document.createElement("div");
     div.className = "line";
-    const head = document.createElement("div");
-    head.className = "line-head";
-    const kbd = document.createElement("kbd");
-    kbd.textContent = i + 1;
-    const status = document.createElement("span");
-    status.className = "line-status";
-    head.append(kbd, status);
     const queue = document.createElement("div");
     queue.className = "queue";
-    div.append(head, queue);
+    div.appendChild(queue);
     div.addEventListener("click", () => dish(i));
     els.lines.appendChild(div);
   }

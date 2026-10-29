@@ -13,47 +13,26 @@ function ok(name, fn) {
 }
 
 console.log("level table:");
-ok("exactly 50 levels, all invariants hold", () => {
+ok("exactly 4 levels (one per restaurant), all invariants hold", () => {
   const issues = C.verifyLevels();
   assert.deepStrictEqual(issues, []);
 });
-ok("level 1 is the promised easy opener", () => {
-  const l1 = C.LEVELS[0];
-  assert.strictEqual(l1.menuItems, 2);
-  assert.strictEqual(l1.target, 10);
-  assert.strictEqual(l1.qtyMax, 2);
-});
-ok("max of 10 menu items is respected, reached well before the end", () => {
-  for (const l of C.LEVELS) assert.ok(l.menuItems <= 10);
-  assert.strictEqual(C.LEVELS[24].menuItems, 10);
-  assert.strictEqual(C.LEVELS[49].menuItems, 10);
-});
-ok("served target scales 10 -> 45 across the 50 levels", () => {
-  assert.strictEqual(C.LEVELS[0].target, 10);
-  assert.strictEqual(C.LEVELS[49].target, 45);
-  for (const l of C.LEVELS) assert.ok(l.target >= 10 && l.target <= 45);
-});
-ok("max demand reaches 10 items at the late levels (45-50)", () => {
-  assert.strictEqual(C.LEVELS[0].qtyMax, 2);
-  const late = C.LEVELS.filter((l) => l.level >= 45 && l.level <= 50);
-  assert.strictEqual(late.length, 6);
-  for (const l of late) assert.strictEqual(l.qtyMax, 10);
-  for (const l of C.LEVELS) assert.ok(l.qtyMax >= 2 && l.qtyMax <= 10);
-});
-ok("belt capacity is proportionate to demand (one full order + 3, cap 13)", () => {
+ok("every level is hard identically: 10-item menu, max 10 demand, 45 customers", () => {
   for (const l of C.LEVELS) {
-    assert.strictEqual(l.maxOnBelt, Math.min(13, l.qtyMax + 3), `L${l.level}`);
-    assert.ok(l.maxOnBelt >= l.qtyMax, `L${l.level} belt must hold a full order`);
+    assert.strictEqual(l.menuItems, 10, `L${l.level} menuItems`);
+    assert.strictEqual(l.qtyMax, 10, `L${l.level} qtyMax`);
+    assert.strictEqual(l.target, 45, `L${l.level} target`);
+    assert.strictEqual(l.maxOnBelt, 13, `L${l.level} maxOnBelt`);
   }
-  assert.strictEqual(C.LEVELS[0].maxOnBelt, 5);
-  assert.strictEqual(C.LEVELS[49].maxOnBelt, 13);
+});
+ok("a long shift: 45 customers per level leaves room for two storm-outs", () => {
+  for (const l of C.LEVELS) assert.strictEqual(C.levelRoster(l.level).length, 47, `L${l.level}`);
 });
 
 console.log("themes:");
-ok("4 themes cycle across all 50 levels", () => {
-  for (let n = 1; n <= 50; n++) {
-    const expect = C.THEMES[(n - 1) % 4].name;
-    assert.strictEqual(C.themeForLevel(n).name, expect, `L${n}`);
+ok("4 levels, one per restaurant, in theme order", () => {
+  for (let n = 1; n <= C.LEVELS.length; n++) {
+    assert.strictEqual(C.themeForLevel(n).name, C.THEMES[n - 1].name, `L${n}`);
   }
 });
 ok("each theme has at least 10 distinct menu items", () => {
@@ -72,7 +51,7 @@ ok("menu for a level slices the theme to the level's item count", () => {
 
 console.log("customers:");
 ok("every pre-generated roster: menu items only, qty within the level's range", () => {
-  for (const l of [C.LEVELS[0], C.LEVELS[24], C.LEVELS[44], C.LEVELS[49]]) {
+  for (const l of C.LEVELS) {
     for (const c of C.levelRoster(l.level)) {
       assert.ok(C.menuForLevel(l.level).includes(c.type), "type on menu");
       assert.ok(c.qty >= 1 && c.qty <= l.qtyMax, "qty in range");
@@ -112,7 +91,7 @@ ok("every deck is big enough to fill all 4 kitchen lines (5 each)", () => {
   }
 });
 ok("deck totals exactly equal the roster's orders, per type and overall", () => {
-  for (let lvl = 1; lvl <= 50; lvl++) {
+  for (let lvl = 1; lvl <= C.LEVELS.length; lvl++) {
     const cfg = C.LEVELS[lvl - 1];
     const roster = C.levelRoster(lvl);
     const pool = C.makePool(roster);
@@ -128,7 +107,7 @@ ok("deck totals exactly equal the roster's orders, per type and overall", () => 
   }
 });
 ok("deck front chunk = the next customer's order (nothing buried)", () => {
-  for (let lvl = 1; lvl <= 50; lvl += 3) {
+  for (let lvl = 1; lvl <= C.LEVELS.length; lvl++) {
     const cfg = C.LEVELS[lvl - 1];
     const roster = C.levelRoster(lvl);
     const pool = C.makePool(roster);
