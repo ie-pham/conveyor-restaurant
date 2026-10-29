@@ -84,8 +84,8 @@
       if (l.qtyMax !== 10) issues.push(`L${l.level} qtyMax ${l.qtyMax}`);
       if (l.target !== 45) issues.push(`L${l.level} target ${l.target}`);
       if (l.patience < 15 || l.patience > 40) issues.push(`L${l.level} patience ${l.patience}`);
-      if (l.maxOnBelt !== 13) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
-      if (l.beltSpeed < 120 || l.beltSpeed > 220) issues.push(`L${l.level} beltSpeed ${l.beltSpeed}`);
+      if (l.maxOnBelt !== 40) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
+      if (l.beltSpeed < 60 || l.beltSpeed > 220) issues.push(`L${l.level} beltSpeed ${l.beltSpeed}`);
       if (l.refillMs < 1500 || l.refillMs > 2600) issues.push(`L${l.level} refillMs ${l.refillMs}`);
       if (prev) {
         if (l.patience > prev.patience) issues.push(`L${l.level} patience not decreasing`);
@@ -103,7 +103,7 @@
         totals.set(c.type, (totals.get(c.type) || 0) + c.qty);
       }
       const deckTotal = [...totals.values()].reduce((a, b) => a + b, 0);
-      if (deckTotal < 20) issues.push(`L${l.level} deck too small for 4 kitchen lines: ${deckTotal}`);
+      if (deckTotal < 24) issues.push(`L${l.level} deck too small to fill 4 kitchen lines: ${deckTotal}`);
       const pool = poolTypeCounts(makePool(roster));
       for (const [t, n] of totals) {
         if (pool.get(t) !== n) issues.push(`L${l.level} deck mismatch for ${t}`);

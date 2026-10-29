@@ -18,10 +18,10 @@ function levelCfg(level) {
   return {
     menuItems: 10,
     target: 45,
-    patience: 25,
-    beltSpeed: 165,
+    patience: 35, // easy-going patience — slow belt, forgiving schedule
+    beltSpeed: 83, // half speed — food rolls along leisurely, like it's actually premade
     refillMs: 1900,
-    maxOnBelt: 13,
+    maxOnBelt: 40, // room for 4 customers x up to 10 dishes each,
     qtyMax: 10
   };
 }

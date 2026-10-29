@@ -44,8 +44,9 @@ Controls: `1–4` dish · `P` pause · `M` mute · `R` restart level · `Enter` 
 
 ## Art & assets
 
-- Dish icons: **OpenMoji** by hfg-gmuend, licensed under **CC BY-SA 4.0** (bundled locally under
-  `img/food/`; refresh with `node tools/fetch-food-icons.js`). Judge against `preview-icons.html`.
-- Faces & UI glyphs: **Twemoji** graphics by Twitter/X, Inc and contributors, licensed under
+- Dish icons and the 8 customer faces: original vector art drawn for this game
+  (`node tools/generate-art.js` regenerates `img/food/` and the face PNGs; needs `rsvg-convert`).
+  Judge against `preview-icons.html`.
+- Other UI glyphs: **Twemoji** graphics by Twitter/X, Inc and contributors, licensed under
   **CC-BY 4.0** (bundled locally under `img/`; regenerate with `node tools/fetch-assets.js`).
 - Fonts: [Fredoka](https://fonts.google.com/specimen/Fredoka) (OFL) via Google Fonts, with system fallbacks.

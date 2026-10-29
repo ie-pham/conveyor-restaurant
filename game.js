@@ -40,8 +40,8 @@ const els = {
   hudTheme: $("hud-theme"),
   levelPager: $("level-pager"), levelTrack: $("level-track"), levelDots: $("level-dots"),
   lvlPrev: $("lvl-prev"), lvlNext: $("lvl-next"),
-  statServed: $("stat-served"), statAngry: $("stat-angry"),
-  statScore: $("stat-score"), statBelt: $("stat-belt"),
+  customersLeft: $("customers-left"), statAngry: $("stat-angry"),
+  statScore: $("stat-score"),
   btnMute: $("btn-mute"), btnPause: $("btn-pause"), btnQuit: $("btn-quit"),
   lines: $("lines"), beltArea: $("belt-area"), beltTrack: $("belt-track"), beltMouth: $("belt-mouth"),
   beltItems: $("belt-items"), stations: $("stations"),
@@ -72,17 +72,17 @@ function buildLoop(cx, cy, w, h, r) {
       push(ccx + r * Math.cos(a), ccy + r * Math.sin(a));
     }
   };
-  // clockwise, starting at top-center (the kitchen mouth)
-  push(cx, y0);
-  push(x1 - r, y0);
-  pushArc(x1 - r, y0 + r, -Math.PI / 2, 0);
-  push(x1, y1 - r);
-  pushArc(x1 - r, y1 - r, 0, Math.PI / 2);
+  // clockwise, starting at bottom-center — where the kitchen lines feed the belt
+  push(cx, y1);
   push(x0 + r, y1);
   pushArc(x0 + r, y1 - r, Math.PI / 2, Math.PI);
   push(x0, y0 + r);
   pushArc(x0 + r, y0 + r, Math.PI, (3 * Math.PI) / 2);
-  push(cx, y0); // closes the loop
+  push(x1 - r, y0);
+  pushArc(x1 - r, y0 + r, -Math.PI / 2, 0);
+  push(x1, y1 - r);
+  pushArc(x1 - r, y1 - r, 0, Math.PI / 2);
+  push(cx, y1); // closes the loop
 
   const cum = [0];
   for (let i = 1; i < pts.length; i++) {
@@ -118,12 +118,23 @@ function buildLoop(cx, cy, w, h, r) {
 
 /* ---------------- geometry ---------------- */
 
+// If the board's content is taller than the phone frame, scale it down to fit —
+// the kitchen must never be pushed below the fold.
+function fitBoard() {
+  const sc = els.screenGame;
+  const avail = sc.clientHeight;
+  const content = sc.scrollHeight;
+  const s = (content > avail && avail > 0) ? avail / content : 1;
+  sc.style.transformOrigin = "top left";
+  sc.style.transform = s === 1 ? "" : "scale(" + s + ")";
+}
+
 function buildGeo() {
   const rect = els.beltArea.getBoundingClientRect();
   const W = rect.width, H = rect.height;
   const cx = W / 2, cy = H / 2;
-  const trackW = Math.max(200, W - 120);
-  const trackH = Math.max(140, H - 80); // always fits the area box (40px gutter top/bottom)
+  const trackW = Math.max(150, W - 190); // wide side gutters so customers sit beside the belt band
+  const trackH = Math.max(120, H - 60); // always fits the area box (30px gutter top/bottom)
   const corner = Math.max(10, Math.min(44, trackW / 2 - 8, trackH / 2 - 8));
   const loop = buildLoop(cx, cy, trackW, trackH, corner);
   const x0 = cx - trackW / 2, x1 = cx + trackW / 2;
@@ -158,7 +169,7 @@ function buildGeo() {
   els.beltTrack.style.height = (trackH + band * 2) + "px";
   els.beltTrack.style.borderRadius = (corner + band) + "px";
   els.beltMouth.style.left = cx + "px";
-  els.beltMouth.style.top = y0 + "px";
+  els.beltMouth.style.top = y1 + "px";
   els.beltMouth.style.transform = "translate(-50%, -50%)";
   positionStations();
 }
@@ -169,7 +180,7 @@ function positionStations() {
     if (!st.pod) continue;
     st.pod.el.style.left = st.x + "px";
     st.pod.el.style.top = st.y + "px";
-    st.pod.body.style.marginLeft = (st.side === "left" ? -28 : 28) + "px";
+    st.pod.body.style.marginLeft = (st.side === "left" ? -44 : 44) + "px";
   }
 }
 
@@ -186,7 +197,7 @@ function buildState(level) {
   const lines = [];
   for (let i = 0; i < 4; i++) {
     const q = [];
-    for (let j = 0; j < LINE_MAX && pool.length; j++) q.push(takeFromPool(pool, null));
+    for (let j = 0; j < LINE_MAX + 1 && pool.length; j++) q.push(takeFromPool(pool, null));
     lines.push(q);
   }
   return {
@@ -376,9 +387,10 @@ function takeFromPool(pool, want) {
   return pool.shift();
 }
 
-// Keep a line topped up to its 5 slots straight from the pre-made deck.
+// Keep a line topped up straight from the pre-made deck. It holds one extra dish
+// that the queue clips — so a full line visibly "continues past" the bottom edge.
 function topUpLine(i) {
-  while (S.lines[i].length < LINE_MAX && canDealFromPool(S.pool, S.rosterIdx)) {
+  while (S.lines[i].length < LINE_MAX + 1 && canDealFromPool(S.pool, S.rosterIdx)) {
     S.lines[i].push(takeFromPool(S.pool, activeWants()));
   }
 }
@@ -388,11 +400,11 @@ function updateLineUI(i) {
   const q = S.lines[i];
   const qEl = lineEl.querySelector(".queue");
   qEl.textContent = "";
-  // fixed 5 slots always — later slots show as empty placeholders so every line is the same height
-  for (let k = 0; k < LINE_MAX; k++) {
+  // render everything in the queue; the fixed-height container clips the overflow tail
+  for (let k = 0; k < q.length; k++) {
     const c = document.createElement("div");
-    c.className = k < q.length ? "chip" : "chip empty";
-    if (k < q.length) c.appendChild(artEl(q[k].type));
+    c.className = "chip";
+    c.appendChild(artEl(q[k].type));
     qEl.appendChild(c);
   }
 }
@@ -459,32 +471,20 @@ function render() {
 }
 
 function updateHUD() {
-  els.statServed.textContent = `Served ${S.served}/${S.cfg.target}`;
+  els.customersLeft.textContent = `Customers left: ${Math.max(0, S.cfg.target - S.served)}`;
   els.statAngry.textContent = `😤 ${S.angry}/3`;
   els.statAngry.classList.toggle("low", S.angry >= 2);
   els.statScore.textContent = `⭐ ${S.score}`;
-  els.statBelt.textContent = `Belt ${S.belt.length}/${S.cfg.maxOnBelt}`;
-  els.statBelt.classList.toggle("danger", S.belt.length >= S.cfg.maxOnBelt);
   syncBeltCap();
 }
 
 function syncBeltCap() {
   if (!S) return;
-  const max = S.cfg.maxOnBelt;
-  els.beltCapNum.textContent = `${S.belt.length}/${max}`;
-  els.beltCap.classList.toggle("full", S.belt.length >= max);
-  for (let i = 0; i < els.beltCapPips.children.length; i++) {
-    els.beltCapPips.children[i].classList.toggle("on", i < S.belt.length);
-  }
+  els.beltCapNum.textContent = `${S.belt.length}/${S.cfg.maxOnBelt}`;
+  els.beltCap.classList.toggle("full", S.belt.length >= S.cfg.maxOnBelt);
 }
 
 function buildBeltCap() {
-  els.beltCapPips.textContent = "";
-  for (let i = 0; i < S.cfg.maxOnBelt; i++) {
-    const p = document.createElement("div");
-    p.className = "pip";
-    els.beltCapPips.appendChild(p);
-  }
   syncBeltCap();
 }
 
@@ -549,6 +549,7 @@ function startLevel(n) {
   for (let i = 0; i < 4; i++) updateLineUI(i);
   els.hudTheme.textContent = `${S.theme.emoji} Level ${n} · ${S.theme.name}`;
   updateHUD();
+  fitBoard();
   sfx("start");
   last = performance.now();
 }
@@ -747,8 +748,8 @@ function bind() {
   });
 
   // rebuild geometry whenever the belt's box changes (window resize, fonts loading, dvh shifts)
-  new ResizeObserver(() => { if (S && geo) buildGeo(); }).observe(els.beltArea);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (S && geo) buildGeo(); });
+  new ResizeObserver(() => { if (S && geo) { buildGeo(); fitBoard(); } }).observe(els.beltArea);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (S && geo) { buildGeo(); fitBoard(); } });
   document.addEventListener("visibilitychange", () => {
     if (document.hidden && S && S.phase === "playing") togglePause();
   });
@@ -846,7 +847,6 @@ function simMode() {
   }, 16);
   const probe = setInterval(() => {
     if (S) {
-      const hudH = $("hud").clientHeight, kitH = $("kitchen").clientHeight, wrapH = $("belt-wrap").clientHeight, gameH = els.screenGame.clientHeight;
       const lined = S.lines.reduce((a, l) => a + l.length, 0);
       const seated = geo.stations.filter((s) => s.cust).length;
       document.title = `probe served=${S.served}/${S.cfg.target} angry=${S.angry} score=${S.score} belt=${S.belt.length} phase=${S.phase} seated=${seated} pool=${S.pool.length} lined=${lined}`;

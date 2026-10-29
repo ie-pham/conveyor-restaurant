@@ -3,10 +3,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 45,
-  "patience": 25,
-  "beltSpeed": 165,
+  "patience": 35,
+  "beltSpeed": 83,
   "refillMs": 1900,
-  "maxOnBelt": 13,
+  "maxOnBelt": 40,
   "qtyMax": 10,
   "roster": [
    [
@@ -202,10 +202,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 45,
-  "patience": 25,
-  "beltSpeed": 165,
+  "patience": 35,
+  "beltSpeed": 83,
   "refillMs": 1900,
-  "maxOnBelt": 13,
+  "maxOnBelt": 40,
   "qtyMax": 10,
   "roster": [
    [
@@ -401,10 +401,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 45,
-  "patience": 25,
-  "beltSpeed": 165,
+  "patience": 35,
+  "beltSpeed": 83,
   "refillMs": 1900,
-  "maxOnBelt": 13,
+  "maxOnBelt": 40,
   "qtyMax": 10,
   "roster": [
    [
@@ -600,10 +600,10 @@ globalThis.BELT_BITE_LEVELS = [
  {
   "menuItems": 10,
   "target": 45,
-  "patience": 25,
-  "beltSpeed": 165,
+  "patience": 35,
+  "beltSpeed": 83,
   "refillMs": 1900,
-  "maxOnBelt": 13,
+  "maxOnBelt": 40,
   "qtyMax": 10,
   "roster": [
    [

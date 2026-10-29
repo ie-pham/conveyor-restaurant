@@ -22,7 +22,7 @@ ok("every level is hard identically: 10-item menu, max 10 demand, 45 customers",
     assert.strictEqual(l.menuItems, 10, `L${l.level} menuItems`);
     assert.strictEqual(l.qtyMax, 10, `L${l.level} qtyMax`);
     assert.strictEqual(l.target, 45, `L${l.level} target`);
-    assert.strictEqual(l.maxOnBelt, 13, `L${l.level} maxOnBelt`);
+    assert.strictEqual(l.maxOnBelt, 40, `L${l.level} maxOnBelt`);
   }
 });
 ok("a long shift: 45 customers per level leaves room for two storm-outs", () => {
@@ -87,7 +87,7 @@ ok("decks are deterministic: the same fixed data every load", () => {
 ok("every deck is big enough to fill all 4 kitchen lines (5 each)", () => {
   for (const l of C.LEVELS) {
     const total = C.levelRoster(l.level).reduce((s, c) => s + c.qty, 0);
-    assert.ok(total >= 20, `L${l.level} deck ${total}`);
+    assert.ok(total >= 24, `L${l.level} deck ${total}`);
   }
 });
 ok("deck totals exactly equal the roster's orders, per type and overall", () => {

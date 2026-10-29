@@ -30,11 +30,14 @@ body {
   justify-content: center;
   user-select: none;
   -webkit-user-select: none;
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%; /* no mobile font-boost blow-ups */
 }
 
 #app {
   /* phone-shaped board, centered on the black desktop background */
-  height: min(94dvh, 880px);
+  position: relative;
+  height: min(100dvh, 880px); /* dynamic viewport — always fits inside iOS toolbars */
   aspect-ratio: 9 / 19;
   max-width: 96vw;
   display: flex;
@@ -58,12 +61,16 @@ body {
 /* ---------- sprite art (no plates; colors boosted so each dish pops on dark) ---------- */
 .art {
   display: block; object-fit: contain; pointer-events: none;
+  min-width: 0; max-width: 100%; height: auto; /* stop 618px sprites blowing out grid tracks */
   filter: saturate(1.5) contrast(1.25) drop-shadow(0 1px 2px rgba(15, 10, 25, 0.55));
 }
-.belt-item .art { width: 27px; height: 27px; }
-.chip .art { width: 1.5rem; height: 1.5rem; }
-.station .cust .art { width: 2.1rem; height: 2.1rem; }
-.station .want .art { width: 0.95rem; height: 0.95rem; }
+.belt-item .art { width: 40px; height: 40px; }
+.chip .art {
+  width: 3rem; height: 3rem;
+  filter: saturate(1.5) contrast(1.2) drop-shadow(0 4px 5px rgba(45, 22, 0, 0.55));
+}
+.station .cust .art { width: 4.2rem; height: 4.2rem; } /* 2x — customers should be readable */
+.station .want .art { width: 1.9rem; height: 1.9rem; }
 
 /* ---------- buttons (glossy candy) ---------- */
 .btn, .icon-btn, .lvl-tile, .line {
@@ -172,13 +179,14 @@ body {
 /* ---------- HUD ---------- */
 #screen-game { display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; }
 #hud {
-  display: flex; align-items: center; justify-content: space-between; gap: 0.7rem;
-  flex-wrap: wrap; padding: 0.5rem 0.8rem;
-  border-bottom: 2px solid rgba(255, 255, 255, 0.3);
-  background: rgba(70, 10, 70, 0.22);
+  display: flex; flex-direction: column; gap: 0.35rem;
+  padding: 0.55rem 0.7rem 0.5rem;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+  background: linear-gradient(180deg, rgba(90, 15, 70, 0.42), rgba(90, 15, 70, 0.12));
 }
-.hud-left { display: flex; align-items: center; gap: 0.6rem; }
-.hud-title { font-weight: 700; font-size: 0.95rem; color: #fff; text-shadow: 0 1px 3px rgba(80, 10, 70, 0.6); }
+.hud-row { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; }
+.dock { display: flex; gap: 0.4rem; }
+.hud-title { font-weight: 700; font-size: 1rem; letter-spacing: 0.4px; color: #fff; text-shadow: 0 1px 3px rgba(80, 10, 70, 0.7); }
 .theme-pill {
   font-size: 0.8rem; font-weight: 700; color: var(--accent-strong);
   background: #fff; border: 2px solid #fff;
@@ -195,7 +203,7 @@ body {
 .stat.angry.low { border-color: #ff3b5c; color: #ff3b5c; animation: pulse-bad 0.8s infinite; }
 .stat.danger { border-color: #ff3b5c; color: #ff3b5c; box-shadow: 0 2px 12px rgba(255, 59, 92, 0.5); }
 @keyframes pulse-bad { 50% { opacity: 0.55; } }
-.hud-btns { display: flex; gap: 0.4rem; }
+
 .icon-btn {
   font-family: inherit; font-size: 1rem; height: 2.3rem; width: 2.3rem;
   background: #fff; border: 2px solid #fff;
@@ -209,7 +217,7 @@ body {
 /* ---------- kitchen / lines (saturated candy blocks) ---------- */
 #kitchen {
   flex: 0 0 auto;
-  padding: 0.4rem 0.85rem 0.5rem;
+  padding: 0.4rem 0.85rem 0;
   display: flex; flex-direction: column; gap: 0.35rem;
   border-top: 2px solid rgba(255, 255, 255, 0.3);
   background: rgba(70, 10, 70, 0.18);
@@ -217,9 +225,12 @@ body {
 .kitchen-label { text-align: center; font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; color: #fff; font-weight: 700; text-shadow: 0 1px 3px rgba(80, 10, 70, 0.6); }
 .lines { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
 .line {
-  display: flex; flex-direction: column; gap: 0.22rem;
-  background: #26262e; border: 2px solid rgba(255, 255, 255, 0.22);
-  border-radius: 14px; padding: 0.35rem 0.45rem;
+  display: flex; flex-direction: column; gap: 0.22rem; min-width: 0;
+  background: linear-gradient(180deg, #d8ad7e, #a8784f); /* lighter warm wooden counter */
+  border: 2px solid #5f3d22; /* dark brown trim */
+  border-bottom: none; /* the kitchen runs off the bottom edge — sides and top only */
+  border-radius: 14px 14px 0 0; padding: 0.35rem 0.45rem 0.55rem;
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.18), inset 0 -6px 12px rgba(90, 50, 20, 0.35), 0 4px 0 rgba(10, 8, 20, 0.5);
   cursor: pointer; align-items: stretch;
   box-shadow: 0 4px 0 rgba(10, 8, 20, 0.55);
   transition: border-color 0.15s, transform 0.08s;
@@ -228,17 +239,18 @@ body {
 .line:hover { filter: brightness(1.02); }
 .line:active { transform: scale(0.97); }
 
-/* dark grey kitchen columns — the vivid dish colors are the stars */
-.line:nth-child(1) { background: #26262e; border-color: #ff7096; }
-.line:nth-child(2) { background: #26262e; border-color: #ffb423; }
-.line:nth-child(3) { background: #26262e; border-color: #37c97f; }
-.line:nth-child(4) { background: #26262e; border-color: #3f8fff; }
 
-.queue { display: flex; flex-direction: column; gap: 0.2rem; align-items: center; justify-content: flex-start; }
+
+.queue {
+  display: flex; flex-direction: column; gap: 0.2rem; align-items: center; justify-content: flex-start;
+  width: 100%; min-width: 0;
+  height: 17.9rem; /* five slots + a slice of the 6th, cut by overflow */
+  overflow: hidden;
+}
 /* dishes sit bare on the dark line — no card around each item. New dishes slide in
    smoothly from the deck instead of lagging on a restock timer. */
 .chip {
-  width: 100%; height: 1.8rem; display: grid; place-items: center;
+  width: 100%; min-width: 0; height: 3.2rem; display: grid; place-items: center;
   background: transparent; border: none; box-shadow: none;
   animation: chip-in 0.18s ease;
 }
@@ -256,12 +268,12 @@ body {
 
 /* ---------- belt ---------- */
 #belt-wrap {
-  flex: 1 1 auto; width: 100%; min-height: 250px;
+  flex: 1 1 auto; width: 100%; min-height: 135px; /* the belt yields first when the screen is short */
   display: flex;
 }
 #belt-area {
   position: relative; flex: 1; margin: 0.5rem;
-  min-height: 220px;
+  min-height: 150px;
   transition: none;
   border-radius: 18px;
   background:
@@ -291,22 +303,28 @@ body {
 @keyframes mouth-glow { 50% { opacity: 0.2; } }
 
 #belt-items, #stations { position: absolute; inset: 0; pointer-events: none; }
-#belt-cap {
-  position: absolute; top: 8px; left: 10px; z-index: 6;
-  display: flex; align-items: center; gap: 6px;
+.belt-pill {
+  position: absolute; z-index: 6;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
   background: rgba(255, 255, 255, 0.95); border: 2px solid #fff;
   border-radius: 999px; padding: 4px 10px;
   font-size: 0.72rem; color: var(--ink-dim); pointer-events: none;
   box-shadow: 0 3px 10px rgba(60, 0, 60, 0.35);
 }
-.belt-cap-label { text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-#belt-cap-num { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
-#belt-cap-pips { display: flex; gap: 3px; }
-.pip { width: 9px; height: 9px; border-radius: 3px; background: #f0d9e4; border: 1px solid #dbb8c8; }
-.pip.on { background: var(--accent); border-color: #fff; box-shadow: 0 0 6px rgba(255, 255, 255, 0.6); }
+/* belt capacity — smack in the middle of the conveyor loop */
+#belt-cap { left: 50%; top: 50%; transform: translate(-50%, -50%); }
+/* customers still to serve — a slim centered strip right above the belt */
+#customers-left {
+  z-index: 6;
+  width: fit-content; margin: 4px auto 2px;
+  background: rgba(255, 255, 255, 0.95); border: 2px solid #fff;
+  border-radius: 999px; padding: 3px 14px;
+  font-size: 0.75rem; font-weight: 800; color: var(--ink);
+  box-shadow: 0 3px 10px rgba(60, 0, 60, 0.35);
+}
+#belt-cap-num { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; font-size: 0.85rem; min-width: 4.4rem; text-align: center; }
 #belt-cap.full { border-color: #ff8da0; }
 #belt-cap.full #belt-cap-num { color: var(--danger); }
-#belt-cap.full .pip.on { background: var(--danger); border-color: #fff; box-shadow: 0 0 6px rgba(255, 60, 90, 0.7); }
 
 .belt-item {
   position: absolute; width: 30px; height: 30px;
@@ -327,7 +345,7 @@ body {
 .station { position: absolute; z-index: 4; }
 .pod-body {
   /* bare customer: no group container — face, then order ticket below */
-  position: absolute; left: 0; top: 0; width: 68px;
+  position: absolute; left: 0; top: 0; width: 60px;
   transform: translate(-50%, -50%);
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   background: transparent;
@@ -337,14 +355,14 @@ body {
   filter: drop-shadow(0 3px 5px rgba(50, 0, 60, 0.35));
 }
 .station .want {
-  font-size: 0.85rem; font-weight: 700;
+  font-size: 1rem; font-weight: 700;
   background: color-mix(in srgb, var(--accent) 25%, #fff);
   border: 1px solid color-mix(in srgb, var(--accent) 60%, #fff);
   border-radius: 999px; padding: 0.1rem 0.5rem;
   white-space: nowrap; display: flex; align-items: center; gap: 0.2rem;
   color: var(--ink);
 }
-.station .want big { font-size: 1rem; width: 0.95rem; }
+.station .want big { font-size: 1.4rem; width: 1.9rem; }
 .station.arrive .pod-body { animation: arrive 0.4s ease; }
 @keyframes arrive { 0% { transform: translate(-50%, -50%) translateY(26px) scale(0.6); opacity: 0; } 100% { transform: translate(-50%, -50%) translateY(0) scale(1); opacity: 1; } }
 .station.leave-happy .pod-body { animation: leave-happy 0.55s ease forwards; }
@@ -380,7 +398,7 @@ body {
 .jam-bar { height: 6px; background: #fadbe2; border-radius: 99px; margin-top: 0.4rem; overflow: hidden; }
 #jam-fill { height: 100%; width: 0; background: var(--danger); border-radius: 99px; }
 
-footer#foot { flex: 0 0 auto; text-align: center; font-size: 0.72rem; color: #ffe9f5; padding: 0.45rem 0 0.55rem; letter-spacing: 0.6px; text-shadow: 0 1px 3px rgba(70, 10, 70, 0.6); }
+
 
 /* ---------- modals ---------- */
 .modal {
@@ -415,21 +433,22 @@ footer#foot { flex: 0 0 auto; text-align: center; font-size: 0.72rem; color: #ff
 
 /* ---------- responsive / touch ---------- */
 @media (max-width: 760px) {
-  #hud { padding: 0.5rem 0.6rem; gap: 0.45rem; }
+  #hud { padding: 0.5rem 0.6rem 0.45rem; gap: 0.3rem; }
   .hud-title { display: none; }
   .stat { font-size: 0.74rem; padding: 0.26rem 0.6rem; }
   .icon-btn { height: 2.75rem; width: 2.75rem; font-size: 1.3rem; border-radius: 14px; } /* >= 44px touch target */
   .lines { gap: 0.45rem; }
   .line { padding: 0.4rem 0.5rem; min-height: 3.6rem; }
-  .chip { width: 100%; height: 2.2rem; font-size: 1.3rem; border-radius: 10px; }
-  .chip .art { width: 1.4rem; height: 1.4rem; }
-  .belt-item { width: 28px; height: 28px; font-size: 1.25rem; }
-  .belt-item .art { width: 24px; height: 24px; }
-  .pod-body { width: 60px; }
+  .chip { width: 100%; height: 2.9rem; font-size: 1rem; border-radius: 9px; }
+  .chip .art { width: 2.4rem; height: 2.4rem; }
+  .queue { height: 16.5rem; }
+  .belt-item { width: 30px; height: 30px; font-size: 1.25rem; }
+  .belt-item .art { width: 34px; height: 34px; }
+  .pod-body { width: 62px; }
   .station .cust { font-size: 1.45rem; }
-  .station .cust .art { width: 1.7rem; height: 1.7rem; }
-  .station .want { font-size: 0.6rem; }
-  .station .want big { font-size: 0.85rem; width: 0.85rem; }
+  .station .cust .art { width: 3.3rem; height: 3.3rem; }
+  .station .want { font-size: 0.8rem; }
+  .station .want big { font-size: 1.05rem; width: 1.5rem; }
   .kitchen-label { font-size: 0.62rem; }
   #belt-area { margin: 0.4rem; }
   .btn { min-height: 3rem; padding: 0.7rem 1.4rem; }

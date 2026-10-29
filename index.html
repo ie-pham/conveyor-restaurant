@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Belt &amp; Bite</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍽️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=20251029">
 </head>
 <body>
 <div id="app">
@@ -36,28 +36,29 @@
   <!-- ============ GAME SCREEN ============ -->
   <section id="screen-game" class="screen hidden">
     <header id="hud">
-      <div class="hud-left">
+      <div class="hud-row">
         <span class="hud-title">🍽️ Belt &amp; Bite</span>
+        <div class="dock">
+          <button id="btn-mute" class="icon-btn" title="Mute (M)">🔊</button>
+          <button id="btn-pause" class="icon-btn" title="Pause (P)">⏸</button>
+          <button id="btn-quit" class="icon-btn" title="Menu">🏠</button>
+        </div>
+      </div>
+      <div class="hud-row">
         <span id="hud-theme" class="theme-pill">Level 1 · Sushi Bar</span>
-      </div>
-      <div class="hud-stats">
-        <span id="stat-served" class="stat">Served 0/10</span>
-        <span id="stat-angry" class="stat angry">😤 0/3</span>
-        <span id="stat-score" class="stat">⭐ 0</span>
-        <span id="stat-belt" class="stat">Belt 0/6</span>
-      </div>
-      <div class="hud-btns">
-        <button id="btn-mute" class="icon-btn" title="Mute (M)">🔊</button>
-        <button id="btn-pause" class="icon-btn" title="Pause (P)">⏸</button>
-        <button id="btn-quit" class="icon-btn" title="Menu">🏠</button>
+        <div class="hud-stats">
+          <span id="stat-angry" class="stat angry">😤 0/3</span>
+          <span id="stat-score" class="stat">⭐ 0</span>
+        </div>
       </div>
     </header>
 
+    <div id="customers-left" class="shift-strip"></div>
     <div id="belt-wrap">
       <div id="belt-area">
         <div id="belt-track"></div>
         <div id="belt-mouth"></div>
-        <div id="belt-cap"><span class="belt-cap-label">belt</span><span id="belt-cap-pips"></span><span id="belt-cap-num"></span></div>
+        <div id="belt-cap" class="belt-pill"><span id="belt-cap-num"></span></div>
         <div id="belt-items"></div>
         <div id="stations"></div>
         <div id="jam-warn" class="jam-warn hidden">
@@ -72,7 +73,6 @@
       <div id="lines" class="lines"></div>
     </div>
 
-    <footer id="foot"><span>1–4 dish · P pause · M mute · R restart level</span></footer>
   </section>
 </div>
 
@@ -130,8 +130,8 @@
   </div>
 </div>
 
-<script src="levels-data.js"></script>
-<script src="game-core.js"></script>
-<script src="game.js"></script>
+<script src="levels-data.js?v=20251029"></script>
+<script src="game-core.js?v=20251029"></script>
+<script src="game.js?v=20251029"></script>
 </body>
 </html>
