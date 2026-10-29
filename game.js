@@ -29,7 +29,7 @@ const $ = (id) => document.getElementById(id);
 const GRAB_R = 40;        // px: how close an item must be to a station to be grabbed
 const JAM_GRACE = 2.5;    // s: belt-jam warning before the level is lost
 const LINE_MAX = 5;       // items per kitchen line queue
-const FILL_DELAY = 0.75;   // s between kitchen line fills — paces the shift out
+const SURPLUS = 0.3;       // the kitchen cooks ~30% more than ordered — no scarcity
 const STORE = "beltbite:v1";
 const CUST_FACES = ["🧑‍🍳", "👩‍🍳", "👨‍🍳", "🧑‍🦱", "👵", "🧔", "👧", "🧓"];
 
@@ -189,10 +189,15 @@ function positionStations() {
 function buildState(level) {
   const cfg = LEVELS[level - 1];
   const menu = menuForLevel(level);
-  // Fixed roster + exact kitchen stock: the kitchen produces precisely what the
-  // roster will order (target to serve + up-to-2 angry slack).
-  const roster = levelRoster(level);
-  const pool = levelPool(level); // pre-shuffled production line — exact multiset, scambled order
+  // Replay variety: same 62 orders and dish totals every play (identical difficulty),
+  // but the guest arrival order and the kitchen's batch line get re-rolled each time.
+  const base = levelRoster(level);
+  const roster = [...base];
+  for (let i = roster.length - 1; i > 0; i--) {
+    const j = randInt(0, i);
+    [roster[i], roster[j]] = [roster[j], roster[i]];
+  }
+  const pool = buildRuntimePool(roster);
   // startup fill: every line opens with LINE_MAX items, drawn freely from the deck front
   const lines = [];
   for (let i = 0; i < 4; i++) {
@@ -208,7 +213,6 @@ function buildState(level) {
     roster, pool, rosterIdx: 0,
     belt: [],
     lines,
-    lineFill: [0, 0, 0, 0],
     jam: null
   };
 }
@@ -293,7 +297,7 @@ function leaveAngry(st) {
   for (let i = 0; i < S.lines.length; i++) {
     const before = S.lines[i].length;
     S.lines[i] = S.lines[i].filter((t) => t.src !== src);
-    if (S.lines[i].length !== before) { S.lineFill[i] = S.time + FILL_DELAY; updateLineUI(i); }
+    if (S.lines[i].length !== before) updateLineUI(i);
   }
   // their plate may already be circling the belt — pull it so it can't orphan the finish
   const stray = S.belt.filter((b) => b.src === src);
@@ -331,7 +335,6 @@ function dish(i) {
   const item = line.shift();
   if (!item) return;
   S.belt.push({ type: item.type, src: item.src, t: 0, el: mkItemEl(item.type) });
-  S.lineFill[i] = S.time + FILL_DELAY; // next dish lands after a short beat — pacing, not restock
   updateLineUI(i);
   sfx("dish");
   updateHUD();
@@ -354,6 +357,7 @@ function consume(item, st, pos) {
   const cust = st.cust;
   if (!cust) return;
   cust.qty--;
+  cust.patience = S.cfg.patience; // every bite restarts the clock — only a stall drains patience
   if (cust.qty <= 0) {
     leaveHappy(st, cust);
   } else {
@@ -375,6 +379,35 @@ function activeWants() {
 
 // Deal the next dish from the exact deck: prefer a nearby item a seated customer
 // wants (depth-bounded lookahead), otherwise the deck's front (the next customer's order).
+// Rebuild the kitchen's production line fresh for this play: every guest's dishes, plus
+// a surplus of spare plates (~30% — src -1, owned by no one so they can't be written off),
+// grouped into 3-5 batches (never a lonely single) and the batches shuffled.
+function buildRuntimePool(roster) {
+  const byType = new Map();
+  roster.forEach((c, src) => {
+    if (!byType.has(c.type)) byType.set(c.type, []);
+    for (let i = 0; i < c.qty; i++) byType.get(c.type).push({ type: c.type, src });
+  });
+  for (const plates of byType.values()) {
+    const extra = Math.ceil(plates.length * SURPLUS);
+    for (let i = 0; i < extra; i++) plates.push({ type: plates[0].type, src: -1 });
+  }
+  const batches = [];
+  for (const plates of byType.values()) {
+    for (let i = 0; i < plates.length; ) {
+      let n = Math.min(3 + randInt(0, 2), plates.length - i);
+      if (i + n === plates.length - 1) n += 1; // never leave a lonely single
+      batches.push(plates.slice(i, i + n));
+      i += n;
+    }
+  }
+  for (let i = batches.length - 1; i > 0; i--) {
+    const j = randInt(0, i);
+    [batches[i], batches[j]] = [batches[j], batches[i]];
+  }
+  return batches.flat();
+}
+
 // Deal the next dish strictly from the deck's front — the kitchen just cooks down its
 // production line, so much of it is food no seated guest has ordered yet. (Deck stays exact;
 // src lets us write off a stormed-out customer's food.)
@@ -421,11 +454,10 @@ function update(dt) {
     c.patience -= dt;
     if (c.patience <= 0) leaveAngry(st);
   }
-  // kitchen line fills (gently paced)
+  // kitchen line fills — pre-made dishes slide in instantly, no waiting
   for (let i = 0; i < 4; i++) {
-    if (S.lines[i].length < LINE_MAX + 1 && S.lineFill[i] <= S.time && S.pool.length) {
+    if (S.lines[i].length < LINE_MAX + 1 && S.pool.length) {
       S.lines[i].push(takeFromPool(S.pool));
-      S.lineFill[i] = S.time + FILL_DELAY;
       updateLineUI(i);
     }
   }

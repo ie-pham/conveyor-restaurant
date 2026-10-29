@@ -116,9 +116,20 @@ ok("kitchen deck is shuffled: same multiset as the roster, but order is scramble
     assert.strictEqual(pool.length, total, `L${lvl} length`);
     const counts = C.poolTypeCounts(pool);
     for (const [t, n] of need) assert.strictEqual(counts.get(t) || 0, n, `L${lvl} ${t}`);
-    // not in roster-chunk order: scrambled means at least one neighboring pair is "wrong"-ish
+    // shuffled batch order: never the straight roster-chunk sequence
     const ordered = C.makePool(roster).map((t) => t.type);
-    assert.notDeepStrictEqual(pool.map((t) => t.type).slice(0, 12), ordered.slice(0, 12), `L${lvl} not shuffled?`);
+    assert.notDeepStrictEqual(pool.map((t) => t.type), ordered, `L${lvl} not shuffled?`);
+    // batches: no same-type run shorter than 2 — the kitchen never outputs a lonely single
+    const types = pool.map((t) => t.type);
+    let run = 1;
+    for (let i = 1; i < types.length; i++) {
+      run = types[i] === types[i - 1] ? run + 1 : 1;
+      if (run === 1) assert.ok(types[i] !== types[i - 1], "unreachable");
+      if (i === types.length - 1 || types[i] !== types[i + 1]) {
+        assert.ok(run >= 2, `L${lvl} lone single at ${i}`);
+        run = 1;
+      }
+    }
   }
 });
 ok("angry-leave write-off never removes more than that customer's order", () => {

@@ -47,14 +47,28 @@ for (let level = 1; level <= THEMES.length; level++) {
     // demand is 5..10 — every order is a feast, shifts run long
     roster.push([menu[Math.floor(rng() * menu.length)], 5 + Math.floor(rng() * (cfg.qtyMax - 4))]);
   }
-  // kitchen deck: one entry per plate tagged by customer, then SHUFFLED — the production
-  // line is a scrambled mix of the whole menu, unrelated to who arrives next.
-  const pool = [];
-  roster.forEach((c, src) => { for (let i = 0; i < c[1]; i++) pool.push(src); });
-  for (let i = pool.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [pool[i], pool[j]] = [pool[j], pool[i]];
+  // kitchen deck: same multiset of plates, but grouped into cooking batches of 3-5 same-type
+  // plates (never a lonely single), then the batches themselves are shuffled. So the line
+  // shows runs of the same dish scattered across the menu — not perfectly aligned to orders.
+  const byType = new Map();
+  roster.forEach((c, src) => {
+    if (!byType.has(c[0])) byType.set(c[0], []);
+    for (let i = 0; i < c[1]; i++) byType.get(c[0]).push(src); // one plate per ordered dish
+  });
+  const batches = [];
+  for (const srcs of byType.values()) {
+    for (let i = 0; i < srcs.length; ) {
+      let n = Math.min(3 + Math.floor(rng() * 3), srcs.length - i);
+      if (i + n === srcs.length - 1) n += 1; // never leave a lonely single as the tail (max batch 6)
+      batches.push(srcs.slice(i, i + n));
+      i += n;
+    }
   }
+  for (let i = batches.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [batches[i], batches[j]] = [batches[j], batches[i]];
+  }
+  const pool = batches.flat();
   levels.push({ ...cfg, roster, pool });
 }
 
