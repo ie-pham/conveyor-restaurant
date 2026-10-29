@@ -14,11 +14,11 @@ A tiny conveyor-belt restaurant game. No build step — open `index.html` in a b
   (or press `1`–`4`) and its front dish pops onto the belt at the delivery mouth.
 - The belt loops forever. A dish is served when it passes a customer who ordered it;
   anything else just keeps rolling around.
-- Customers have patience bars. An empty bar means they storm out — **3 angry customers = game over**.
+- Customers have patience bars. An empty bar means they storm out — **5 angry customers = game over**.
 - The belt holds a max number of dishes. If it's full and **none of the dishes match what
   anyone wants**, the belt jams and you lose (a short warning gives a new customer's order
   a chance to save you).
-- Serve the daily target (60 customers) to clear a level, then the theme changes:
+- Serve the daily target (40 customers) to clear a level, then the theme changes:
   sushi → tacos → pizza → ramen, cycling every level.
 - 50 levels. Guests can demand up to 10 of a single dish at the top levels, and the belt
   capacity limit grows proportionally (2 slots per possible demanded item + 2, capped at 20).

@@ -95,7 +95,7 @@
       if (l.menuItems !== 8) issues.push(`L${l.level} menuItems ${l.menuItems}`);
       if (menuForLevel(l.level).length !== 8) issues.push(`L${l.level} shift menu size`);
       if (l.qtyMax !== 10) issues.push(`L${l.level} qtyMax ${l.qtyMax}`);
-      if (l.target !== 60) issues.push(`L${l.level} target ${l.target}`);
+      if (l.target !== 40) issues.push(`L${l.level} target ${l.target}`);
       if (l.patience < 15 || l.patience > 110) issues.push(`L${l.level} patience ${l.patience}`);
       if (l.maxOnBelt !== 40) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
       if (l.beltSpeed < 60 || l.beltSpeed > 220) issues.push(`L${l.level} beltSpeed ${l.beltSpeed}`);
@@ -108,7 +108,7 @@
       // deck validation: fixed roster fits its level and the kitchen stock is exact
       const roster = levelRoster(l.level);
       const menu = new Set(menuForLevel(l.level));
-      if (roster.length !== l.target + 2) issues.push(`L${l.level} roster size ${roster.length}`);
+      if (roster.length !== l.target + 5) issues.push(`L${l.level} roster size ${roster.length}`);
       const totals = new Map();
       for (const c of roster) {
         if (!menu.has(c.type)) issues.push(`L${l.level} roster type not on menu: ${c.type}`);

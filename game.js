@@ -27,10 +27,10 @@ function artText(e) {
 const $ = (id) => document.getElementById(id);
 
 const GRAB_R = 40;        // px: how close an item must be to a station to be grabbed
-const JAM_GRACE = 2.5;    // s: belt-jam warning before the level is lost
+const JAM_GRACE = 4;      // s: belt-jam warning before the level is lost
 const LINE_MAX = 5;       // items per kitchen line queue
-const LOOKAHEAD = 8;      // kitchen peeks this deep for something a seated guest wants
-const SURPLUS = 0.3;       // the kitchen cooks ~30% more than ordered — no scarcity
+const LOOKAHEAD = 12;     // kitchen peeks deep for something a seated guest wants
+const SURPLUS = 0.15;      // a light surplus, not a mountain
 const STORE = "beltbite:v1";
 const CUST_FACES = ["🧑‍🍳", "👩‍🍳", "👨‍🍳", "🧑‍🦱", "👵", "🧔", "👧", "🧓"];
 
@@ -525,8 +525,8 @@ function render() {
 
 function updateHUD() {
   els.customersLeft.textContent = `Customers left: ${Math.max(0, S.cfg.target - S.served)}`;
-  els.statAngry.textContent = `😤 ${S.angry}/3`;
-  els.statAngry.classList.toggle("low", S.angry >= 2);
+  els.statAngry.textContent = `😤 ${S.angry}/5`;
+  els.statAngry.classList.toggle("low", S.angry >= 4);
   els.statScore.textContent = `⭐ ${S.score}`;
   syncBeltCap();
 }
@@ -549,7 +549,7 @@ function checkEnd() {
   // The level ends when the shift is over: target served and nobody left to seat —
   // leftover plates (e.g. a stormed-out order already on the belt) don't block the finish.
   if (S.served >= S.cfg.target && !customersRemain(S.rosterIdx, S.roster.length, occupied)) win();
-  else if (S.served < S.cfg.target && S.angry >= 3) lose("angry");
+  else if (S.served < S.cfg.target && S.angry >= 5) lose("angry");
 }
 
 function win() {
@@ -877,6 +877,25 @@ function simMode() {
   const lvl = Math.max(1, Math.min(50, parseInt(new URLSearchParams(location.search).get("lvl"), 10) || 1));
   startLevel(lvl);
   if (new URLSearchParams(location.search).has("testwin")) S.cfg.target = 1; // test aid: force a fast win
+  const human = new URLSearchParams(location.search).has("human");
+  if (human) {
+    let digAt = 0;
+    setInterval(() => {
+      if (!S || S.phase !== "playing") return;
+      const bid = S.belt.length < S.cfg.maxOnBelt - 4; // never flood the belt
+      if (!bid) return;
+      const want = activeWants();
+      for (let j = 0; j < 4; j++) {
+        const f = S.lines[j][0];
+        if (f && want.has(f.type)) { dish(j); return; }
+      }
+      if (S.time >= digAt) { // careful dig: eat one junk front to advance the line
+        let best = -1, blen = 0;
+        for (let j = 0; j < 4; j++) if (S.lines[j].length > blen) { blen = S.lines[j].length; best = j; }
+        if (best >= 0 && S.lines[best][0]) { dish(best); digAt = S.time + 1.2; }
+      }
+    }, 16);
+  }
   const DT = 1 / 60;
   let ticks = 0;
   setInterval(() => {
