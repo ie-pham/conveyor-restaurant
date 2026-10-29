@@ -30,7 +30,7 @@ const GRAB_R = 40;        // px: how close an item must be to a station to be gr
 const JAM_GRACE = 4;      // s: belt-jam warning before the level is lost
 const LINE_MAX = 5;       // items per kitchen line queue
 const LOOKAHEAD = 12;     // kitchen peeks deep for something a seated guest wants
-const SURPLUS = 0.15;      // a light surplus, not a mountain
+const SURPLUS = 0.05;      // just 5% extra — nearly exact-to-order, fewer leftovers
 const STORE = "beltbite:v1";
 const CUST_FACES = ["🧑‍🍳", "👩‍🍳", "👨‍🍳", "🧑‍🦱", "👵", "🧔", "👧", "🧓"];
 
@@ -473,10 +473,17 @@ function update(dt) {
     for (let i = S.rosterIdx; i < S.roster.length; i++) need.add(i);
     S.pool = S.pool.filter((t) => need.has(t.src)).concat(S.pool.filter((t) => !need.has(t.src)));
   }
-  // kitchen line fills — pre-made dishes slide in instantly, no waiting
+  // kitchen line fills — a wanted dish that comes up jumps to the FRONT of the line,
+  // so the player is never staring at a full counter of nothing they can serve.
   for (let i = 0; i < 4; i++) {
     if (S.lines[i].length < LINE_MAX + 1 && S.pool.length) {
-      S.lines[i].push(takeFromPool(S.pool, activeWants()));
+      const want = activeWants();
+      const take = takeFromPool(S.pool, want);
+      if (want.has(take.type) && want.size && (!S.lines[i].length || !want.has(S.lines[i][0].type))) {
+        S.lines[i].unshift(take); // wanted dish jumps to the front
+      } else {
+        S.lines[i].push(take);
+      }
       updateLineUI(i);
     }
   }
