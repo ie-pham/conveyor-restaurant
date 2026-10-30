@@ -416,12 +416,17 @@ function buildRuntimePool(roster) {
 // Deal the next dish strictly from the deck's front — the kitchen just cooks down its
 // production line, so much of it is food no seated guest has ordered yet. (Deck stays exact;
 // src lets us write off a stormed-out customer's food.)
+const MERCY_DEPTH = 60;    // if the near-future is all wrong dishes, dig deeper for a seated want
 function takeFromPool(pool, want) {
   if (!pool.length) return null;
   if (want && want.size) {
     const depth = Math.min(LOOKAHEAD, pool.length);
     for (let i = 0; i < depth; i++) {
       if (want.has(pool[i].type)) return pool.splice(i, 1)[0];
+    }
+    const wide = Math.min(MERCY_DEPTH, pool.length);
+    for (let i = depth; i < wide; i++) {
+      if (want.has(pool[i].type)) return pool.splice(i, 1)[0]; // stranded plates still reach the counter
     }
   }
   return pool.shift();
