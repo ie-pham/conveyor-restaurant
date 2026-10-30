@@ -248,6 +248,15 @@ function setVacant(st) {
   st.pod.fill.style.width = "0%";
 }
 
+// Keep the pantry windowed: everything within DEAL_AHEAD of the next guest to sit
+// is pulled to the front of the deck so the lines always have something to serve.
+function refreshFridge() {
+  const lim = S.rosterIdx + DEAL_AHEAD;
+  const ok = (it) => it.src < 0 || it.src <= lim;
+  const a = S.pool.filter(ok), b = S.pool.filter((it) => !ok(it));
+  S.pool = a.concat(b);
+}
+
 function spawnCustomer() {
   if (S.rosterIdx >= S.roster.length) return; // all booked customers are seated or gone
   const idx = geo.stations.findIndex((s) => !s.cust);
@@ -256,6 +265,7 @@ function spawnCustomer() {
   const book = S.roster[S.rosterIdx];
   const cust = { type: book.type, qty: book.qty, patience: S.cfg.patience, src: S.rosterIdx };
   S.rosterIdx++;
+  refreshFridge();
   st.cust = cust;
   st.pod.el.classList.remove("vacant", "leave-happy", "leave-angry");
   st.pod.cust.textContent = "";
@@ -418,27 +428,20 @@ function buildRuntimePool(roster) {
 // src lets us write off a stormed-out customer's food.)
 const MERCY_DEPTH = 60;    // if the near-future is all wrong dishes, dig deeper for a seated want
 const DEAL_AHEAD = 8;       // never dish for someone further than 8 seats out — plates stay in the pantry
-function takeFromPool(pool, want, dealMax) {
+function takeFromPool(pool, want) {
   if (!pool.length) return null;
-  const limit = dealMax === null ? Infinity : dealMax;
-  const dealable = (it) => it.src < 0 || it.src <= limit;
   const depth = Math.min(LOOKAHEAD, pool.length);
   if (want && want.size) {
     for (let i = 0; i < depth; i++) {
-      if (want.has(pool[i].type) && dealable(pool[i])) return pool.splice(i, 1)[0];
+      if (want.has(pool[i].type)) return pool.splice(i, 1)[0];
     }
     const wide = Math.min(MERCY_DEPTH, pool.length);
     for (let i = depth; i < wide; i++) {
-      if (want.has(pool[i].type) && dealable(pool[i])) return pool.splice(i, 1)[0];
+      if (want.has(pool[i].type)) return pool.splice(i, 1)[0];
     }
   }
-  for (let i = 0; i < Math.min(12, pool.length); i++) {
-    if (dealable(pool[i])) return pool.splice(i, 1)[0]; // any dish within the pantry window
-  }
-  return null; // everything left is for guests too far out — the line waits for them
+  return pool.shift();
 }
-
-
 
 function updateLineUI(i) {
   const lineEl = els.lines.children[i];
@@ -490,19 +493,11 @@ function update(dt) {
     c.patience -= dt;
     if (c.patience <= 0) leaveAngry(st);
   }
-  // last-mile: with 8 guests left, the kitchen reparts the deck so their orders
-  // come first — the finale is never buried under surplus leftovers
-  if (!S.finalized && S.roster.length - S.rosterIdx <= 8) {
-    S.finalized = true;
-    const need = new Set();
-    for (let i = S.rosterIdx; i < S.roster.length; i++) need.add(i);
-    S.pool = S.pool.filter((t) => need.has(t.src)).concat(S.pool.filter((t) => !need.has(t.src)));
-  }
   // kitchen line fills — desired dishes join the tail normally (no mid-queue reorder,
   // so tapping stays stable); a big lookahead means most of what arrives IS relevant.
   for (let i = 0; i < 4; i++) {
     if (S.lines[i].length < LINE_MAX + 1 && S.pool.length) {
-      const took = takeFromPool(S.pool, activeWants(), S.rosterIdx + DEAL_AHEAD);
+      const took = takeFromPool(S.pool, activeWants());
       if (took) { S.lines[i].push(took); updateLineUI(i); }
     }
   }
