@@ -108,7 +108,7 @@
       }
       // deck validation: fixed roster fits its level and the kitchen stock is exact
       const tier = Math.floor((l.level - 1) / 4);
-      const wantMercy = [60, 40, 30][tier];
+      const wantMercy = [40, 25, 15][tier];
       if (l.mercy !== wantMercy) issues.push(`L${l.level} mercy ${l.mercy} (want ${wantMercy})`);
       const roster = levelRoster(l.level);
       const menu = new Set(menuForLevel(l.level));

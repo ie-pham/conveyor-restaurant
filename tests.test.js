@@ -46,9 +46,9 @@ ok("themes cycle across the 12 levels (sushi..ramen x3)", () => {
     assert.strictEqual(C.themeForLevel(n).name, C.THEMES[(n - 1) % 4].name, `L${n}`);
   }
 });
-ok("mercy knob per tier: 60 (L1-4), 40 (L5-8), 30 (L9-12)", () => {
+ok("mercy knob per tier: 40 (L1-4), 25 (L5-8), 15 (L9-12)", () => {
   C.LEVELS.forEach((l) => {
-    const want = [60, 40, 30][Math.floor((l.level - 1) / 4)];
+    const want = [40, 25, 15][Math.floor((l.level - 1) / 4)];
     assert.strictEqual(l.mercy, want, `L${l.level}`);
   });
 });

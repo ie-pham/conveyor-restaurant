@@ -17,13 +17,13 @@ const THEMES = [
 /** difficulty tier: levels 1-4 = calm kitchen (wide mercy reach),
     5-8 = busy (medium), 9-12 = frantic (shallow) */
 function levelCfg(level) {
-  const mercy = [60, 40, 30][Math.floor((level - 1) / 4)];
+  const mercy = [40, 25, 15][Math.floor((level - 1) / 4)];
   return {
     mercy,
     menuItems: 8, // each shift works from 8 dishes, picked from the theme's 10
     target: 50, // a meaty shift — 50 happy customers, 55 in the book
     patience: 90, // generous patience — starvation is rare
-    beltSpeed: 80, // lively belt — food reaches guests faster
+    beltSpeed: 80,
     refillMs: 1900,
     maxOnBelt: 40, // roomier belt — surplus food has somewhere to sit,
     qtyMax: 10
@@ -59,7 +59,7 @@ for (let level = 1; level <= 12; level++) {
     recent.push(type);
     if (recent.length > 4) recent.shift();
     // demand is 5..10 — every order is a feast, shifts run long
-    roster.push([type, 3 + Math.floor(rng() * (cfg.qtyMax - 2))]); // 3..10 per guest
+    roster.push([type, 5 + Math.floor(rng() * (cfg.qtyMax - 4))]); // 5..10 per guest
   }
   // kitchen deck: same multiset of plates, but grouped into cooking batches of 3-5 same-type
   // plates (never a lonely single), then the batches themselves are shuffled. So the line
