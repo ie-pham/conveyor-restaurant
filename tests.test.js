@@ -13,7 +13,7 @@ function ok(name, fn) {
 }
 
 console.log("level table:");
-ok("exactly 4 levels (one per restaurant), all invariants hold", () => {
+ok("exactly 12 levels (4 restaurants x 3 tiers), all invariants hold", () => {
   const issues = C.verifyLevels();
   assert.deepStrictEqual(issues, []);
 });
@@ -41,10 +41,16 @@ ok("demand stays varied: never all 4 seats on the same dish", () => {
 });
 
 console.log("themes:");
-ok("4 levels, one per restaurant, in theme order", () => {
+ok("themes cycle across the 12 levels (sushi..ramen x3)", () => {
   for (let n = 1; n <= C.LEVELS.length; n++) {
-    assert.strictEqual(C.themeForLevel(n).name, C.THEMES[n - 1].name, `L${n}`);
+    assert.strictEqual(C.themeForLevel(n).name, C.THEMES[(n - 1) % 4].name, `L${n}`);
   }
+});
+ok("mercy knob per tier: 60 (L1-4), 40 (L5-8), 30 (L9-12)", () => {
+  C.LEVELS.forEach((l) => {
+    const want = [60, 40, 30][Math.floor((l.level - 1) / 4)];
+    assert.strictEqual(l.mercy, want, `L${l.level}`);
+  });
 });
 ok("each theme has at least 10 distinct menu items", () => {
   for (const t of C.THEMES) {

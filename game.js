@@ -29,7 +29,7 @@ const $ = (id) => document.getElementById(id);
 const GRAB_R = 40;        // px: how close an item must be to a station to be grabbed
 const JAM_GRACE = 4;      // s: belt-jam warning before the level is lost
 const LINE_MAX = 5;       // items per kitchen line queue
-const LOOKAHEAD = 15;     // mid-way relevance — wanted dishes show up, but not everything at once
+const LOOKAHEAD = 8;      // a light preference, not a crutch
 const SURPLUS = 0.05;      // just 5% extra — nearly exact-to-order, fewer leftovers
 const STORE = "beltbite:v1";
 const CUST_FACES = ["🧑‍🍳", "👩‍🍳", "👨‍🍳", "🧑‍🦱", "👵", "🧔", "👧", "🧓"];
@@ -432,18 +432,18 @@ function buildRuntimePool(roster) {
 // Deal the next dish strictly from the deck's front — the kitchen just cooks down its
 // production line, so much of it is food no seated guest has ordered yet. (Deck stays exact;
 // src lets us write off a stormed-out customer's food.)
-const MERCY_DEPTH = 60;    // if the near-future is all wrong dishes, dig deeper for a seated want
 const DEAL_AHEAD = 8;       // never dish for someone further than 8 seats out — plates stay in the pantry
+// mercy range is per-level (S.cfg.mercy): 60 calm / 40 busy / 30 frantic
 function takeFromPool(pool, want) {
   if (!pool.length) return null;
-  const depth = Math.min(LOOKAHEAD, pool.length);
   if (want && want.size) {
+    const depth = Math.min(LOOKAHEAD, pool.length);
     for (let i = 0; i < depth; i++) {
       if (want.has(pool[i].type)) return pool.splice(i, 1)[0];
     }
-    const wide = Math.min(MERCY_DEPTH, pool.length);
+    const wide = Math.min(S.cfg.mercy, pool.length);
     for (let i = depth; i < wide; i++) {
-      if (want.has(pool[i].type)) return pool.splice(i, 1)[0];
+      if (want.has(pool[i].type)) return pool.splice(i, 1)[0]; // rescue when things get tight
     }
   }
   return pool.shift();

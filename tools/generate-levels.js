@@ -14,8 +14,12 @@ const THEMES = [
 
 // identical hard difficulty on every level: full menu, demands up to 10,
 // long shift (45 to serve), tight patience
+/** difficulty tier: levels 1-4 = calm kitchen (wide mercy reach),
+    5-8 = busy (medium), 9-12 = frantic (shallow) */
 function levelCfg(level) {
+  const mercy = [60, 40, 30][Math.floor((level - 1) / 4)];
   return {
+    mercy,
     menuItems: 8, // each shift works from 8 dishes, picked from the theme's 10
     target: 50, // a meaty shift — 50 happy customers, 55 in the book
     patience: 90, // generous patience — starvation is rare
@@ -38,11 +42,11 @@ function mulberry32(seed) {
 }
 
 const levels = [];
-for (let level = 1; level <= THEMES.length; level++) {
+for (let level = 1; level <= 12; level++) {
   const cfg = levelCfg(level);
   const rng = mulberry32(20250501 + level * 7919);
   // the shift's menu: 8 of the theme's 10 dishes (seeded pick — the same 8 every load)
-  const themeItems = THEMES[level - 1].items;
+  const themeItems = THEMES[(level - 1) % THEMES.length].items;
   const menu = [...themeItems].sort(() => rng() - 0.5).slice(0, 8);
   const roster = [];
   const recent = []; // last 4 arrivals — keep demand varied: a full table never all wants the same dish

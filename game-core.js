@@ -25,7 +25,8 @@
     beltSpeed: l.beltSpeed,
     refillMs: l.refillMs,
     maxOnBelt: l.maxOnBelt,
-    qtyMax: l.qtyMax
+    qtyMax: l.qtyMax,
+    mercy: l.mercy
   }));
 
   // The fixed customer lineup for a level (target to serve + angry slack).
@@ -88,7 +89,7 @@
   // Levels are one per theme, all hard (full 10-item menu, demands up to 10, 45 customers).
   function verifyLevels() {
     const issues = [];
-    if (LEVELS.length !== 4) issues.push("need exactly 4 levels (one per theme)");
+    if (LEVELS.length !== 12) issues.push("need exactly 12 levels (4 themes x 3 tiers)");
     let prev = null;
     for (const l of LEVELS) {
       if (prev && l.level !== prev.level + 1) issues.push(`level numbers not sequential: ${l.level}`);
@@ -106,6 +107,9 @@
         if (l.refillMs > prev.refillMs) issues.push(`L${l.level} refillMs not decreasing`);
       }
       // deck validation: fixed roster fits its level and the kitchen stock is exact
+      const tier = Math.floor((l.level - 1) / 4);
+      const wantMercy = [60, 40, 30][tier];
+      if (l.mercy !== wantMercy) issues.push(`L${l.level} mercy ${l.mercy} (want ${wantMercy})`);
       const roster = levelRoster(l.level);
       const menu = new Set(menuForLevel(l.level));
       if (roster.length !== l.target + 5) issues.push(`L${l.level} roster size ${roster.length}`);
