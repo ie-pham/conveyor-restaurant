@@ -204,7 +204,7 @@ function buildState(level) {
   const lines = [];
   for (let i = 0; i < 4; i++) {
     const q = [];
-    for (let j = 0; j < LINE_MAX + 1 && pool.length; j++) q.push(takeFromPool(pool, null));
+    for (let j = 0; j < LINE_MAX + 1 && pool.length; j++) q.push(takeFromPool(pool, null, null));
     lines.push(q);
   }
   return {
@@ -417,19 +417,25 @@ function buildRuntimePool(roster) {
 // production line, so much of it is food no seated guest has ordered yet. (Deck stays exact;
 // src lets us write off a stormed-out customer's food.)
 const MERCY_DEPTH = 60;    // if the near-future is all wrong dishes, dig deeper for a seated want
-function takeFromPool(pool, want) {
+const DEAL_AHEAD = 8;       // never dish for someone further than 8 seats out — plates stay in the pantry
+function takeFromPool(pool, want, dealMax) {
   if (!pool.length) return null;
+  const limit = dealMax === null ? Infinity : dealMax;
+  const dealable = (it) => it.src < 0 || it.src <= limit;
+  const depth = Math.min(LOOKAHEAD, pool.length);
   if (want && want.size) {
-    const depth = Math.min(LOOKAHEAD, pool.length);
     for (let i = 0; i < depth; i++) {
-      if (want.has(pool[i].type)) return pool.splice(i, 1)[0];
+      if (want.has(pool[i].type) && dealable(pool[i])) return pool.splice(i, 1)[0];
     }
     const wide = Math.min(MERCY_DEPTH, pool.length);
     for (let i = depth; i < wide; i++) {
-      if (want.has(pool[i].type)) return pool.splice(i, 1)[0]; // stranded plates still reach the counter
+      if (want.has(pool[i].type) && dealable(pool[i])) return pool.splice(i, 1)[0];
     }
   }
-  return pool.shift();
+  for (let i = 0; i < Math.min(12, pool.length); i++) {
+    if (dealable(pool[i])) return pool.splice(i, 1)[0]; // any dish within the pantry window
+  }
+  return null; // everything left is for guests too far out — the line waits for them
 }
 
 
@@ -453,7 +459,20 @@ function updateLineUI(i) {
 function update(dt) {
   // belt advances clockwise
   for (const item of S.belt) {
+    const prev = item.t;
     item.t = (item.t + (S.cfg.beltSpeed * dt) / geo.loop.total) % 1;
+    if (item.t < prev) item.lap = (item.lap || 0) + 1; // full lap made
+  }
+  // spoilage: a plate that nobody grabbed after 3 full laps gets scrapped,
+  // so junk can never permanently clog the belt and trap real orders behind it.
+  for (let i = S.belt.length - 1; i >= 0; i--) {
+    const b = S.belt[i];
+    // spoilage ONLY for surplus plates (owned by no one) — anything tagged to a real
+    // customer stays usable stock for the next guest who orders it (dishes are fungible).
+    if ((b.lap || 0) >= 3 && b.src < 0) {
+      b.el.remove();
+      S.belt.splice(i, 1);
+    }
   }
   // grabbing: items are eaten by the first matching station they pass
   for (const item of [...S.belt]) {
@@ -483,8 +502,8 @@ function update(dt) {
   // so tapping stays stable); a big lookahead means most of what arrives IS relevant.
   for (let i = 0; i < 4; i++) {
     if (S.lines[i].length < LINE_MAX + 1 && S.pool.length) {
-      S.lines[i].push(takeFromPool(S.pool, activeWants()));
-      updateLineUI(i);
+      const took = takeFromPool(S.pool, activeWants(), S.rosterIdx + DEAL_AHEAD);
+      if (took) { S.lines[i].push(took); updateLineUI(i); }
     }
   }
   // belt jam rule
@@ -960,6 +979,13 @@ function simMode() {
   }, 16);
   const probe = setInterval(() => {
     if (S) {
+      const need = new Map();
+      for (let i = S.rosterIdx; i < S.roster.length; i++) {
+        const c = S.roster[i]; need.set(c.type, (need.get(c.type) || 0) + c.qty);
+      }
+      for (const st of geo.stations) if (st.cust) need.set(st.cust.type, (need.get(st.cust.type) || 0) + st.cust.qty);
+      const avail = new Map();
+      for (const pl of [...S.pool, ...S.lines.flat(), ...S.belt]) avail.set(pl.type, (avail.get(pl.type) || 0) + 1);
       const lined = S.lines.reduce((a, l) => a + l.length, 0);
       const seated = geo.stations.filter((s) => s.cust).length;
       document.title = `probe served=${S.served}/${S.cfg.target} angry=${S.angry} score=${S.score} belt=${S.belt.length} phase=${S.phase} seated=${seated} pool=${S.pool.length} lined=${lined}`;
