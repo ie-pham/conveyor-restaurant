@@ -43,7 +43,7 @@ const els = {
   lvlPrev: $("lvl-prev"), lvlNext: $("lvl-next"),
   customersLeft: $("customers-left"), statAngry: $("stat-angry"),
   statScore: $("stat-score"),
-  btnMute: $("btn-mute"), btnPause: $("btn-pause"), btnQuit: $("btn-quit"),
+  btnMute: $("btn-mute"), btnMusic: $("btn-music"), btnPause: $("btn-pause"), btnQuit: $("btn-quit"),
   lines: $("lines"), beltArea: $("belt-area"), beltTrack: $("belt-track"), beltMouth: $("belt-mouth"),
   beltItems: $("belt-items"), stations: $("stations"),
   beltCap: $("belt-cap"), beltCapPips: $("belt-cap-pips"), beltCapNum: $("belt-cap-num"),
@@ -58,6 +58,7 @@ let S = null;   // per-level state
 let geo = null; // belt geometry
 let best = 1;
 let muted = false;
+let musicOn = true;
 
 /* ---------------- belt loop path (rounded rect, arc-length parameterized) ---------------- */
 
@@ -737,6 +738,37 @@ function tone(freq, dur, type, vol, when, slide) {
   o.start(t0); o.stop(t0 + dur + 0.03);
 }
 
+/* friendly background music — a soft triangle arpeggio + low pad, per-restaurant flavor */
+const CHORD_PROGS = [
+  [[261.6, 329.6, 392.0], [220.0, 261.6, 329.6], [174.6, 220.0, 261.6], [196.0, 246.9, 293.7]], // sushi: warm C
+  [[293.7, 349.2, 440.0], [246.9, 293.7, 369.9], [196.0, 246.9, 293.7], [261.6, 329.6, 392.0]], // taco: bright D
+  [[261.6, 329.6, 392.0], [261.6, 311.1, 392.0], [220.0, 261.6, 329.6], [220.0, 277.2, 329.6]], // pizza: bouncy
+  [[220.0, 261.6, 329.6], [196.0, 246.9, 293.7], [174.6, 220.0, 261.6], [164.8, 220.0, 261.6]]  // ramen: mellow
+];
+const eighth = 0.28;
+const ARP = [0, 1, 2, 1, 2, 1, 0, 2];
+let musicNext = 0;
+function musicTick() {
+  if (!actx || !musicOn || muted) return;
+  if (musicNext < actx.currentTime - 0.5) musicNext = actx.currentTime + 0.05;
+  const prog = S ? (S.level - 1) % CHORD_PROGS.length : 0;
+  const chords = CHORD_PROGS[prog];
+  while (musicNext < actx.currentTime + 0.9) {
+    const step = Math.floor(musicNext / eighth) % 32;
+    const chord = chords[Math.floor(musicNext / eighth / 8) % 4];
+    const f = chord[ARP[step % 8]] * (step >= 16 ? 2 : 1);
+    tone(f, eighth * 0.92, "triangle", 0.055, musicNext - actx.currentTime, 0);
+    if (step % 8 === 0) tone(chord[0] / 2, eighth * 8 * 0.92, "sine", 0.045, musicNext - actx.currentTime, 0);
+    musicNext += eighth;
+  }
+}
+function toggleMusic() {
+  musicOn = !musicOn;
+  syncMusic();
+  save();
+}
+function syncMusic() { els.btnMusic.textContent = musicOn ? "🎶" : "🚫"; }
+
 function sfx(name) {
   if (muted || !actx) return;
   switch (name) {
@@ -758,6 +790,7 @@ function bind() {
   els.btnPlay.addEventListener("click", () => startLevel(best));
   els.btnHowto.addEventListener("click", () => els.modalHowto.classList.remove("hidden"));
   els.btnMute.addEventListener("click", toggleMute);
+  els.btnMusic.addEventListener("click", toggleMusic);
   els.btnPause.addEventListener("click", (e) => { e.stopPropagation(); togglePause(); });
   els.btnQuit.addEventListener("click", showStart);
   els.btnResume.addEventListener("click", togglePause);
@@ -824,11 +857,12 @@ function loadStore() {
     const s = JSON.parse(localStorage.getItem(STORE) || "{}");
     best = Math.max(1, Math.min(LEVELS.length, s.best || 1));
     muted = !!s.muted;
+    musicOn = s.musicOn !== false;
   } catch (e) { /* first run */ }
   syncMute();
 }
 function save() {
-  try { localStorage.setItem(STORE, JSON.stringify({ best, muted })); } catch (e) { /* private mode */ }
+  try { localStorage.setItem(STORE, JSON.stringify({ best, muted, musicOn })); } catch (e) { /* private mode */ }
 }
 
 /* ---------------- loop + boot ---------------- */
@@ -937,6 +971,8 @@ function simMode() {
 
 function boot() {
   loadStore();
+  syncMusic();
+  setInterval(musicTick, 200); // keyed to WebAudio's clock once audio is allowed
   buildLines();
   buildLevelGrid();
   bind();
