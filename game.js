@@ -347,6 +347,12 @@ function dish(i) {
   const item = line.shift();
   if (!item) return;
   S.belt.push({ type: item.type, src: item.src, t: 0, el: mkItemEl(item.type) });
+  // the line refills immediately on the tap itself — a queue can never sit empty
+  // unless the whole deck is truly done
+  let fill = 0;
+  while (S.lines[i].length < LINE_MAX + 1 && S.pool.length && fill++ < 8) {
+    S.lines[i].push(takeFromPool(S.pool, activeWants()));
+  }
   updateLineUI(i);
   sfx("dish");
   updateHUD();
