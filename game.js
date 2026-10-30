@@ -29,7 +29,7 @@ const $ = (id) => document.getElementById(id);
 const GRAB_R = 40;        // px: how close an item must be to a station to be grabbed
 const JAM_GRACE = 4;      // s: belt-jam warning before the level is lost
 const LINE_MAX = 5;       // items per kitchen line queue
-const LOOKAHEAD = 12;     // kitchen peeks deep for something a seated guest wants
+const LOOKAHEAD = 30;     // kitchen scoops deep for wanted dishes — relevant lines, stable order
 const SURPLUS = 0.05;      // just 5% extra — nearly exact-to-order, fewer leftovers
 const STORE = "beltbite:v1";
 const CUST_FACES = ["🧑‍🍳", "👩‍🍳", "👨‍🍳", "🧑‍🦱", "👵", "🧔", "👧", "🧓"];
@@ -474,17 +474,11 @@ function update(dt) {
     for (let i = S.rosterIdx; i < S.roster.length; i++) need.add(i);
     S.pool = S.pool.filter((t) => need.has(t.src)).concat(S.pool.filter((t) => !need.has(t.src)));
   }
-  // kitchen line fills — a wanted dish that comes up jumps to the FRONT of the line,
-  // so the player is never staring at a full counter of nothing they can serve.
+  // kitchen line fills — desired dishes join the tail normally (no mid-queue reorder,
+  // so tapping stays stable); a big lookahead means most of what arrives IS relevant.
   for (let i = 0; i < 4; i++) {
     if (S.lines[i].length < LINE_MAX + 1 && S.pool.length) {
-      const want = activeWants();
-      const take = takeFromPool(S.pool, want);
-      if (want.has(take.type) && want.size && (!S.lines[i].length || !want.has(S.lines[i][0].type))) {
-        S.lines[i].unshift(take); // wanted dish jumps to the front
-      } else {
-        S.lines[i].push(take);
-      }
+      S.lines[i].push(takeFromPool(S.pool, activeWants()));
       updateLineUI(i);
     }
   }
@@ -757,8 +751,8 @@ function musicTick() {
     const step = Math.floor(musicNext / eighth) % 32;
     const chord = chords[Math.floor(musicNext / eighth / 8) % 4];
     const f = chord[ARP[step % 8]] * (step >= 16 ? 2 : 1);
-    tone(f, eighth * 0.92, "triangle", 0.055, musicNext - actx.currentTime, 0);
-    if (step % 8 === 0) tone(chord[0] / 2, eighth * 8 * 0.92, "sine", 0.045, musicNext - actx.currentTime, 0);
+    tone(f, eighth * 0.92, "triangle", 0.1, musicNext - actx.currentTime, 0);
+    if (step % 8 === 0) tone(chord[0] / 2, eighth * 8 * 0.92, "sine", 0.08, musicNext - actx.currentTime, 0);
     musicNext += eighth;
   }
 }
