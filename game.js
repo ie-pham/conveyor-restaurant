@@ -29,7 +29,7 @@ const $ = (id) => document.getElementById(id);
 const GRAB_R = 40;        // px: how close an item must be to a station to be grabbed
 const JAM_GRACE = 4;      // s: belt-jam warning before the level is lost
 const LINE_MAX = 5;       // items per kitchen line queue
-const LOOKAHEAD = 30;     // kitchen scoops deep for wanted dishes — relevant lines, stable order
+const LOOKAHEAD = 15;     // mid-way relevance — wanted dishes show up, but not everything at once
 const SURPLUS = 0.05;      // just 5% extra — nearly exact-to-order, fewer leftovers
 const STORE = "beltbite:v1";
 const CUST_FACES = ["🧑‍🍳", "👩‍🍳", "👨‍🍳", "🧑‍🦱", "👵", "🧔", "👧", "🧓"];
