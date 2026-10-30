@@ -95,7 +95,7 @@
       if (l.menuItems !== 8) issues.push(`L${l.level} menuItems ${l.menuItems}`);
       if (menuForLevel(l.level).length !== 8) issues.push(`L${l.level} shift menu size`);
       if (l.qtyMax !== 10) issues.push(`L${l.level} qtyMax ${l.qtyMax}`);
-      if (l.target !== 40) issues.push(`L${l.level} target ${l.target}`);
+      if (l.target !== 50) issues.push(`L${l.level} target ${l.target}`);
       if (l.patience < 15 || l.patience > 110) issues.push(`L${l.level} patience ${l.patience}`);
       if (l.maxOnBelt !== 40) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
       if (l.beltSpeed < 60 || l.beltSpeed > 220) issues.push(`L${l.level} beltSpeed ${l.beltSpeed}`);

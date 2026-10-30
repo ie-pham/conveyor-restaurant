@@ -17,16 +17,27 @@ ok("exactly 4 levels (one per restaurant), all invariants hold", () => {
   const issues = C.verifyLevels();
   assert.deepStrictEqual(issues, []);
 });
-ok("every level is hard identically: 8-item menu, max 10 demand, 40 customers", () => {
+ok("every level is hard identically: 8-item menu, max 10 demand, 50 customers", () => {
   for (const l of C.LEVELS) {
     assert.strictEqual(l.menuItems, 8, `L${l.level} menuItems`);
     assert.strictEqual(l.qtyMax, 10, `L${l.level} qtyMax`);
-    assert.strictEqual(l.target, 40, `L${l.level} target`);
+    assert.strictEqual(l.target, 50, `L${l.level} target`);
     assert.strictEqual(l.maxOnBelt, 40, `L${l.level} maxOnBelt`);
   }
 });
-ok("45 in the book: 40 to serve + five storm-out slots", () => {
-  for (const l of C.LEVELS) assert.strictEqual(C.levelRoster(l.level).length, 45, `L${l.level}`);
+ok("45 in the book: 50 to serve + five storm-out slots", () => {
+  for (const l of C.LEVELS) assert.strictEqual(C.levelRoster(l.level).length, 55, `L${l.level}`);
+});
+ok("demand stays varied: never all 4 seats on the same dish", () => {
+  for (const l of C.LEVELS) {
+    const types = C.levelRoster(l.level).map((c) => c.type);
+    for (let i = 0; i + 4 <= types.length; i++) {
+      const win = types.slice(i, i + 4);
+      const counts = new Map();
+      for (const t of win) counts.set(t, (counts.get(t) || 0) + 1);
+      for (const n of counts.values()) assert.ok(n < 4, `L${l.level} seat window ${i} has all ${n} same`);
+    }
+  }
 });
 
 console.log("themes:");

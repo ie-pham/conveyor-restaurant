@@ -18,7 +18,7 @@ A tiny conveyor-belt restaurant game. No build step — open `index.html` in a b
 - The belt holds a max number of dishes. If it's full and **none of the dishes match what
   anyone wants**, the belt jams and you lose (a short warning gives a new customer's order
   a chance to save you).
-- Serve the daily target (40 customers) to clear a level, then the theme changes:
+- Serve the daily target (50 customers) to clear a level, then the theme changes:
   sushi → tacos → pizza → ramen, cycling every level.
 - 50 levels. Guests can demand up to 10 of a single dish at the top levels, and the belt
   capacity limit grows proportionally (2 slots per possible demanded item + 2, capped at 20).

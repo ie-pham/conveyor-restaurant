@@ -17,7 +17,7 @@ const THEMES = [
 function levelCfg(level) {
   return {
     menuItems: 8, // each shift works from 8 dishes, picked from the theme's 10
-    target: 40, // a beatable shift — 40 happy customers, 42 in the book
+    target: 50, // a meaty shift — 50 happy customers, 55 in the book
     patience: 90, // generous patience — starvation is rare
     beltSpeed: 80, // lively belt — food reaches guests faster
     refillMs: 1900,
@@ -45,9 +45,17 @@ for (let level = 1; level <= THEMES.length; level++) {
   const themeItems = THEMES[level - 1].items;
   const menu = [...themeItems].sort(() => rng() - 0.5).slice(0, 8);
   const roster = [];
+  const recent = []; // last 4 arrivals — keep demand varied: a full table never all wants the same dish
   for (let i = 0; i < cfg.target + 5; i++) { // up to 5 storm-outs
+    let type, tries = 0;
+    do {
+      type = menu[Math.floor(rng() * menu.length)];
+      tries++;
+    } while (tries < 12 && recent.filter((t) => t === type).length >= 3); // 3 sharing is hard-but-fair; 4 is not
+    recent.push(type);
+    if (recent.length > 4) recent.shift();
     // demand is 5..10 — every order is a feast, shifts run long
-    roster.push([menu[Math.floor(rng() * menu.length)], 3 + Math.floor(rng() * (cfg.qtyMax - 2))]); // 3..10 per guest
+    roster.push([type, 3 + Math.floor(rng() * (cfg.qtyMax - 2))]); // 3..10 per guest
   }
   // kitchen deck: same multiset of plates, but grouped into cooking batches of 3-5 same-type
   // plates (never a lonely single), then the batches themselves are shuffled. So the line
