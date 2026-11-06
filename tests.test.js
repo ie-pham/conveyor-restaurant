@@ -17,16 +17,28 @@ ok("exactly 12 levels (4 restaurants x 3 tiers), all invariants hold", () => {
   const issues = C.verifyLevels();
   assert.deepStrictEqual(issues, []);
 });
-ok("every level is hard identically: 8-item menu, max 10 demand, 50 customers", () => {
+ok("difficulty scales up with level number: L1 gentler than L12 on every lever", () => {
+  const first = C.LEVELS[0], last = C.LEVELS[C.LEVELS.length - 1];
+  assert.ok(first.mercy > last.mercy, "mercy should ease off by L12");
+  assert.ok(first.maxOnBelt > last.maxOnBelt, "belt capacity should shrink");
+  assert.ok(first.target < last.target, "shift should lengthen");
+  assert.ok(first.qtyMax <= last.qtyMax, "demand should not fall");
+});
+ok("patience and belt speed are frozen — never a difficulty lever", () => {
   for (const l of C.LEVELS) {
-    assert.strictEqual(l.menuItems, 8, `L${l.level} menuItems`);
-    assert.strictEqual(l.qtyMax, 10, `L${l.level} qtyMax`);
-    assert.strictEqual(l.target, 50, `L${l.level} target`);
-    assert.strictEqual(l.maxOnBelt, 40, `L${l.level} maxOnBelt`);
+    assert.strictEqual(l.patience, 90, `L${l.level} patience`);
+    assert.strictEqual(l.beltSpeed, 80, `L${l.level} beltSpeed`);
   }
 });
-ok("45 in the book: 50 to serve + five storm-out slots", () => {
-  for (const l of C.LEVELS) assert.strictEqual(C.levelRoster(l.level).length, 55, `L${l.level}`);
+ok("each level's book holds exactly its target plus five storm-out slots", () => {
+  for (const l of C.LEVELS) {
+    assert.strictEqual(C.levelRoster(l.level).length, l.target + 5, `L${l.level}`);
+  }
+});
+ok("mercy decreases with level — the kitchen rescues less as it gets busy", () => {
+  for (let n = 2; n <= C.LEVELS.length; n++) {
+    assert.ok(C.LEVELS[n - 1].mercy <= C.LEVELS[n - 2].mercy, `L${n} mercy up`);
+  }
 });
 ok("demand stays varied: never all 4 seats on the same dish", () => {
   for (const l of C.LEVELS) {
@@ -45,12 +57,6 @@ ok("themes cycle across the 12 levels (sushi..ramen x3)", () => {
   for (let n = 1; n <= C.LEVELS.length; n++) {
     assert.strictEqual(C.themeForLevel(n).name, C.THEMES[(n - 1) % 4].name, `L${n}`);
   }
-});
-ok("mercy knob per tier: 40 (L1-4), 25 (L5-8), 15 (L9-12)", () => {
-  C.LEVELS.forEach((l) => {
-    const want = [40, 25, 15][Math.floor((l.level - 1) / 4)];
-    assert.strictEqual(l.mercy, want, `L${l.level}`);
-  });
 });
 ok("each theme has at least 10 distinct menu items", () => {
   for (const t of C.THEMES) {

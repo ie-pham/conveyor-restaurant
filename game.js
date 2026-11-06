@@ -356,13 +356,12 @@ function dish(i) {
   updateLineUI(i);
   sfx("dish");
   updateHUD();
-  // Dishing can trip the jam rule the instant the belt hits capacity.
+  // Dishing can trip the jam rule the instant the belt hits capacity & holds nothing wanted.
   S.jam = null;
   if (S.belt.length >= S.cfg.maxOnBelt) {
     const want = activeWants();
     const beltOk = S.belt.some((b) => want.has(b.type));
-    const linesOk = S.lines.some((l) => l.some((it) => want.has(it.type)));
-    if (!beltOk && !linesOk) S.jam = { t: 0 };
+    if (!beltOk) S.jam = { t: 0 };
   }
 }
 
@@ -507,13 +506,11 @@ function update(dt) {
       if (took) { S.lines[i].push(took); updateLineUI(i); }
     }
   }
-  // belt jam rule
+  // belt jam rule: the belt alone decides it — at full capacity with nothing on it that
+  // anyone wants, the level is lost. The kitchen lines don't matter: an empty line is your
+  // own blunder to recover from, not a reason to jam.
   const wantTypes = geo.stations.map((s) => s.cust && s.cust.type);
-  const wantSet = new Set(wantTypes.filter(Boolean));
-  const wantedOnBelt = S.belt.some((b) => wantSet.has(b.type));
-  const wantedInLines = S.lines.some((l) => l.some((it) => wantSet.has(it.type)));
-  // a jam only counts when there's no wanted dish anywhere — belt AND lines are dry
-  const jammed = !wantedOnBelt && !wantedInLines && beltJammed(S.belt, wantTypes, S.cfg.maxOnBelt);
+  const jammed = beltJammed(S.belt, wantTypes, S.cfg.maxOnBelt);
   if (jammed) {
     if (!S.jam) S.jam = { t: 0 };
     S.jam.t += dt;

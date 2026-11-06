@@ -12,21 +12,19 @@ const THEMES = [
   { name: "Ramen House", emoji: "🍜", items: ["🍜", "🥟", "🍤", "🍗", "🍛", "🍚", "🍥", "🍵", "🥚", "🍘"] }
 ];
 
-// identical hard difficulty on every level: full menu, demands up to 10,
-// long shift (45 to serve), tight patience
-/** difficulty tier: levels 1-4 = calm kitchen (wide mercy reach),
-    5-8 = busy (medium), 9-12 = frantic (shallow) */
+// difficulty scales up with level number: L1 is a gentle opening shift,
+// L12 is frantic. Every difficulty lever ramps monotonically.
 function levelCfg(level) {
-  const mercy = [40, 25, 15][Math.floor((level - 1) / 4)];
+  const t = (level - 1) / 11; // 0 at L1 .. 1 at L12
   return {
-    mercy,
+    mercy: Math.round(22 * (1 - t)), // 22 -> 0: the kitchen stops rescuing you as it gets busy
     menuItems: 8, // each shift works from 8 dishes, picked from the theme's 10
-    target: 50, // a meaty shift — 50 happy customers, 55 in the book
-    patience: 90, // generous patience — starvation is rare
-    beltSpeed: 80,
-    refillMs: 1900,
-    maxOnBelt: 40, // roomier belt — surplus food has somewhere to sit,
-    qtyMax: 10
+    target: 46 + level, // 47 -> 58: longer shifts, more chances to slip
+    patience: 90, // frozen: patience is off-limits, always 90
+    beltSpeed: 80, // frozen: belt speed is off-limits, always 80
+    refillMs: 2200 - Math.round(1000 * t), // 2200 -> 1200 (runtime doesn't time refills; kept monotonic)
+    maxOnBelt: Math.round(44 - 22 * t), // 44 -> 22: a tighter belt means more jamming pressure
+    qtyMax: 8 + Math.floor((level - 1) / 4) // 8 -> 10: demand grows in tiers
   };
 }
 

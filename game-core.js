@@ -86,7 +86,7 @@
   }
 
   // Sanity checks over the level table; returns array of issue strings.
-  // Levels are one per theme, all hard (full 10-item menu, demands up to 10, 45 customers).
+  // Difficulty scales up with level number; every lever must stay in range and monotonic.
   function verifyLevels() {
     const issues = [];
     if (LEVELS.length !== 12) issues.push("need exactly 12 levels (4 themes x 3 tiers)");
@@ -95,21 +95,21 @@
       if (prev && l.level !== prev.level + 1) issues.push(`level numbers not sequential: ${l.level}`);
       if (l.menuItems !== 8) issues.push(`L${l.level} menuItems ${l.menuItems}`);
       if (menuForLevel(l.level).length !== 8) issues.push(`L${l.level} shift menu size`);
-      if (l.qtyMax !== 10) issues.push(`L${l.level} qtyMax ${l.qtyMax}`);
-      if (l.target !== 50) issues.push(`L${l.level} target ${l.target}`);
-      if (l.patience < 15 || l.patience > 110) issues.push(`L${l.level} patience ${l.patience}`);
-      if (l.maxOnBelt !== 40) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
-      if (l.beltSpeed < 60 || l.beltSpeed > 220) issues.push(`L${l.level} beltSpeed ${l.beltSpeed}`);
-      if (l.refillMs < 1500 || l.refillMs > 2600) issues.push(`L${l.level} refillMs ${l.refillMs}`);
+      if (l.qtyMax < 5 || l.qtyMax > 12) issues.push(`L${l.level} qtyMax ${l.qtyMax}`);
+      if (l.target < 40 || l.target > 70) issues.push(`L${l.level} target ${l.target}`);
+      if (l.patience !== 90) issues.push(`L${l.level} patience ${l.patience} (frozen at 90)`);
+      if (l.maxOnBelt < 18 || l.maxOnBelt > 48) issues.push(`L${l.level} maxOnBelt ${l.maxOnBelt}`);
+      if (l.beltSpeed !== 80) issues.push(`L${l.level} beltSpeed ${l.beltSpeed} (frozen at 80)`);
+      if (l.refillMs < 1000 || l.refillMs > 2400) issues.push(`L${l.level} refillMs ${l.refillMs}`);
+      if (l.mercy < 0 || l.mercy > 45) issues.push(`L${l.level} mercy ${l.mercy}`);
+      // patience and beltSpeed are frozen constants (90 / 80) — verified above, never levers
       if (prev) {
-        if (l.patience > prev.patience) issues.push(`L${l.level} patience not decreasing`);
-        if (l.beltSpeed < prev.beltSpeed) issues.push(`L${l.level} beltSpeed not increasing`);
-        if (l.refillMs > prev.refillMs) issues.push(`L${l.level} refillMs not decreasing`);
+        if (l.maxOnBelt > prev.maxOnBelt) issues.push(`L${l.level} maxOnBelt not decreasing`);
+        if (l.qtyMax < prev.qtyMax) issues.push(`L${l.level} qtyMax not increasing`);
+        if (l.target < prev.target) issues.push(`L${l.level} target not increasing`);
+        if (l.mercy > prev.mercy) issues.push(`L${l.level} mercy not decreasing`);
       }
       // deck validation: fixed roster fits its level and the kitchen stock is exact
-      const tier = Math.floor((l.level - 1) / 4);
-      const wantMercy = [40, 25, 15][tier];
-      if (l.mercy !== wantMercy) issues.push(`L${l.level} mercy ${l.mercy} (want ${wantMercy})`);
       const roster = levelRoster(l.level);
       const menu = new Set(menuForLevel(l.level));
       if (roster.length !== l.target + 5) issues.push(`L${l.level} roster size ${roster.length}`);
